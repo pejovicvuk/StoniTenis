@@ -65,15 +65,14 @@
     <Build Include="dbo\Tables\Stolovi.sql" />
     <Build Include="dbo\Tables\Rezervacije.sql" />
     <Build Include="dbo\Tables\Grupne_Rezervacije.sql" />
-    <Build Include="dbo\Tables\Stalne_Rezervacije.sql" />
-    <Build Include="dbo\Tables\Stalne_Grupne_Rezervacije.sql" />
-    <Build Include="dbo\Tables\Stalne_Rezervacije_Detalji.sql" />
-    <Build Include="dbo\Tables\Stalne_Rezervacije_Promene.sql" />
-    <Build Include="dbo\Tables\Vlasnici.sql" />
     <Build Include="dbo\Tables\Korisnici.sql" />
     <Build Include="dbo\Tables\Klub.sql" />
     <Build Include="dbo\Tables\Lokal.sql" />
     <Build Include="dbo\Tables\Radno_Vreme.sql" />
     <Build Include="dbo\Tables\Specijalno_Vreme.sql" />
+    <Build Include="dbo\Tables\Odradjeni_Termini.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="Database_StoniTenis.refactorlog" />
   </ItemGroup>
 </Project>
