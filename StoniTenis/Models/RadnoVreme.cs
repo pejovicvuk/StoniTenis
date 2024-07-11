@@ -1,14 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StoniTenis.Models
 {
+    [PrimaryKey(nameof(DanUNedelji), nameof(LokalID))]
     public class RadnoVreme
-    {
-        [Key]
+    {      
         public int DanUNedelji { get; set; }
 
-        [Key][ForeignKey("Lokal")]
+        [ForeignKey("Lokal")]
         public int LokalID { get; set; }
 
         public TimeOnly VremeOtvaranja { get; set; } 

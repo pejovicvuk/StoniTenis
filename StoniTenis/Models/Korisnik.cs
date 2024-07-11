@@ -13,6 +13,8 @@ namespace StoniTenis.Models
 
         public string Prezime { get; set; }
 
+        public string Email { get; set; }
+
         public virtual ICollection<Klub> Klubovi { get; set; }
 
         public virtual ICollection<Rezervacije> Rezervacije { get; set; }
