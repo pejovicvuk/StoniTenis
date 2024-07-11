@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using StoniTenis.Data;
 using Microsoft.EntityFrameworkCore;
+using StoniTenis.Models.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,9 +24,11 @@ builder.Services.AddAuthentication(options =>
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
+
+builder.Services.AddScoped<ConnectionService>(provider =>
+    new ConnectionService(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddTransient<KorisnikService>();
 
 var app = builder.Build();
 

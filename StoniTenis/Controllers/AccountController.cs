@@ -2,23 +2,23 @@
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using StoniTenis.Data;
+using System.Security.Claims;
+using StoniTenis.Models.Services;
 
 namespace StoniTenis.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly KorisnikService _korisnikService;
 
-        public AccountController(AppDbContext context)
+        public AccountController(KorisnikService korisnikService)
         {
-            _context = context;
+            _korisnikService = korisnikService;
         }
 
         public IActionResult Index()
         {
-            var korisnici = _context.Korisnici.ToList();
-            return View(korisnici);
+            return View();
         }
 
         public async Task LoginWithGoogle()
@@ -31,18 +31,27 @@ namespace StoniTenis.Controllers
 
         public async Task<IActionResult> GoogleResponse()
         {
-            var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            var authenticateResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            var claims = result.Principal.Identities
-                .FirstOrDefault().Claims.Select(claim => new
-                {
-                    claim.Issuer,
-                    claim.OriginalIssuer,
-                    claim.Type,
-                    claim.Value
-                });
-            return Json(claims);
+            if (!authenticateResult.Succeeded)
+                return BadRequest("Failed to authenticate.");
+
+            var userClaims = authenticateResult.Principal.Identities.FirstOrDefault()?.Claims;
+            if (userClaims == null)
+                return BadRequest("No claims found.");
+
+            var name = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value;
+            var surname = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value;
+            var email = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+
+            if (!_korisnikService.KorisnikPostoji(email))
+            {
+                _korisnikService.InsertKorisnik(name, surname, email, false);
+            }
+
+            return RedirectToAction("Index");
         }
+
 
         public async Task<IActionResult> Logout()
         {
