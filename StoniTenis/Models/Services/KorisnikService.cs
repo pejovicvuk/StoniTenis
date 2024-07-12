@@ -32,7 +32,7 @@ namespace StoniTenis.Models.Services
             using (SqlConnection conn = _connectionService.GetConnection())
             {
                 conn.Open();
-                using (SqlCommand cmd = new SqlCommand("Korisnik_Insert", conn))
+                using (SqlCommand cmd = new SqlCommand("InsertKorisnik", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
