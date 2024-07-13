@@ -3,14 +3,22 @@
 <h2>Lokali</h2>
 <button id="loadReservation">Load Reservation Data</button>
 <script>
-    fetch('/api/Reservation/get-reservations')  // Update the URL to match the new action
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
-            // You can also update the DOM here based on the received data
-        })
-        .catch(error => console.error('Error fetching data:', error));
+    document.getElementById('loadReservation').addEventListener('click', function () {
+        fetch('/api/Reservation/get-reservations')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to load data');
+                }
+            })
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    });
 </script>
+
 
 @* <ul>
     @foreach (var lokal in Model)
