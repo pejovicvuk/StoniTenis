@@ -60,6 +60,7 @@
     <Folder Include="Properties" />
     <Folder Include="dbo\" />
     <Folder Include="dbo\Tables\" />
+    <Folder Include="Snapshots" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\Stolovi.sql" />
@@ -74,5 +75,8 @@
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="Database_StoniTenis.refactorlog" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Snapshots\Database_StoniTenis_20240713_20-22-06.dacpac" />
   </ItemGroup>
 </Project>

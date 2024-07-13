@@ -29,6 +29,7 @@ builder.Services.AddScoped<ConnectionService>(provider =>
     new ConnectionService(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddTransient<KorisnikService>();
+builder.Services.AddTransient<ReservationService>();
 
 var app = builder.Build();
 

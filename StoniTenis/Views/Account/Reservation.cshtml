@@ -1,0 +1,9 @@
+﻿@model List<StoniTenis.Models.Entities.Lokal>
+
+<h2>Lokali</h2>
+<ul>
+    @foreach (var lokal in Model)
+    {
+        <li>@lokal.Adresa </li>
+    }
+</ul>

@@ -16,7 +16,12 @@ namespace StoniTenis.Controllers
             _korisnikService = korisnikService;
         }
 
-        public IActionResult Index()
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        public IActionResult Reservation()
         {
             return View();
         }
@@ -49,14 +54,14 @@ namespace StoniTenis.Controllers
                 _korisnikService.InsertKorisnik(name, surname, email, false);
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Login");
         }
 
 
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync();
-            return RedirectToAction("Index");
+            return RedirectToAction("Login");
         }
     }
 }

@@ -7,4 +7,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="korisnik_id" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="c8dbba5a-e5d8-44fc-bf03-45d98a461af7" ChangeDateTime="07/13/2024 17:59:45">
+    <Property Name="ElementName" Value="[dbo].[Lokal].[opstina]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Lokal]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Lokacija" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7d7fb721-7b52-4baf-a3db-1eb6f1a0ffcf" ChangeDateTime="07/13/2024 18:00:32">
+    <Property Name="ElementName" Value="[dbo].[Lokal].[Lokacija]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Lokal]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="lokacija" />
+  </Operation>
 </Operations>
