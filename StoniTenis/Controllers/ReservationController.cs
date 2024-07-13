@@ -17,13 +17,7 @@ namespace StoniTenis.Controllers
         public IActionResult Reservation()
         {
             var lokali = _reservationService.PopuniLokale();
-            if (lokali == null || !lokali.Any())
-            {
-                // Handle the case where no locations are available
-                // Could also consider returning a view with a specific message
-                return View("Error", "No locations found");
-            }
-            return View("~/Views/Account/Reservation.cshtml", lokali);
+            return View(lokali);
         }
 
     }
