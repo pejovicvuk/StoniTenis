@@ -16,7 +16,7 @@ namespace StoniTenis.Controllers
             _reservationService = reservationService;
         }
 
-        [HttpGet("view")]
+        [HttpGet]
         public IActionResult Reservation()
         {
             return View();

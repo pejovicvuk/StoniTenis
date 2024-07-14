@@ -2,23 +2,8 @@
 
 <h2>Lokali</h2>
 <button id="loadReservation">Load Reservation Data</button>
-<script>
-    document.getElementById('loadReservation').addEventListener('click', function () {
-        fetch('/api/Reservation/get-reservations')
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('Failed to load data');
-                }
-            })
-            .then(data => {
-                console.log(data);
-            })
-            .catch(error => console.error('Error fetching data:', error));
-    });
-</script>
-
+<input type="text" id="searchBar" placeholder="Search...">
+<div id="resultsContainer"></div>
 
 @* <ul>
     @foreach (var lokal in Model)
