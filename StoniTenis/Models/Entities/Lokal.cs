@@ -4,6 +4,7 @@
     {
         public int Id { get; set; }
         public int KlubID { get; set; }
+        public string KlubNaziv { get; set; }
         public DateOnly? kraj_rezervacija { get; set; }
         public string Opstina { get; set; }
         public string Adresa { get; set; }

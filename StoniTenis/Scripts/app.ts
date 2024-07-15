@@ -5,6 +5,7 @@
 interface Reservation {
     adresa: string;
     opstina: string;
+    klubNaziv: string;
 }
 
 let allData: Reservation[] = [];
@@ -27,7 +28,7 @@ function displayItems(items: Reservation[]): void {
         const div = document.createElement('div');
         div.className = 'item';
         const p = document.createElement('p');
-        p.innerText = `Address: ${item.adresa}`;
+        p.innerText = `Adresa: ${item.adresa}, ${item.klubNaziv}`;
         div.appendChild(p);
         container.appendChild(div);
     }
@@ -36,7 +37,8 @@ function displayItems(items: Reservation[]): void {
 function searchItems(searchText: string): void {
     const filteredData = allData.filter(item =>
         item.adresa.toLowerCase().includes(searchText.toLowerCase()) ||
-        item.opstina.toLowerCase().includes(searchText.toLowerCase())
+        item.opstina.toLowerCase().includes(searchText.toLowerCase()) ||
+        item.klubNaziv.toLowerCase().includes(searchText.toLowerCase())
     );
     displayItems(filteredData);
 }

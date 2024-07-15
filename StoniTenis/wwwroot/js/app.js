@@ -19,7 +19,7 @@ function displayItems(items) {
         var div = document.createElement('div');
         div.className = 'item';
         var p = document.createElement('p');
-        p.innerText = "Address: ".concat(item.adresa);
+        p.innerText = "Adresa: ".concat(item.adresa, ", ").concat(item.klubNaziv);
         div.appendChild(p);
         container.appendChild(div);
     }
@@ -27,7 +27,8 @@ function displayItems(items) {
 function searchItems(searchText) {
     var filteredData = allData.filter(function (item) {
         return item.adresa.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.opstina.toLowerCase().includes(searchText.toLowerCase());
+            item.opstina.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.klubNaziv.toLowerCase().includes(searchText.toLowerCase());
     });
     displayItems(filteredData);
 }
