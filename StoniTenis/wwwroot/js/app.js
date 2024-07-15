@@ -18,8 +18,11 @@ function displayItems(items) {
         var item = items_1[_i];
         var div = document.createElement('div');
         div.className = 'item';
+        var h2 = document.createElement('h2');
         var p = document.createElement('p');
-        p.innerText = "Adresa: ".concat(item.adresa, ", ").concat(item.klubNaziv);
+        h2.innerText = "".concat(item.klubNaziv);
+        p.innerText = "".concat(item.adresa);
+        div.appendChild(h2);
         div.appendChild(p);
         container.appendChild(div);
     }

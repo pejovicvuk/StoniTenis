@@ -27,8 +27,11 @@ function displayItems(items: Reservation[]): void {
     for (const item of items) {
         const div = document.createElement('div');
         div.className = 'item';
+        const h2 = document.createElement('h2');
         const p = document.createElement('p');
-        p.innerText = `Adresa: ${item.adresa}, ${item.klubNaziv}`;
+        h2.innerText = `${item.klubNaziv}` 
+        p.innerText = `${item.adresa}`;
+        div.appendChild(h2);
         div.appendChild(p);
         container.appendChild(div);
     }
