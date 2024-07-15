@@ -20,7 +20,7 @@ namespace StoniTenis.Models.Services
             using (SqlConnection conn = _connectionService.GetConnection())
             {
                 conn.Open();
-                string sql = "SELECT Id, Adresa, Lokacija FROM Lokal";
+                string sql = "SELECT Id, Klub_Id, Adresa, Opstina, Grad FROM Lokal";
                 SqlCommand cmd = new SqlCommand(sql, conn);
 
                 using (SqlDataReader reader = cmd.ExecuteReader())
@@ -30,8 +30,10 @@ namespace StoniTenis.Models.Services
                         lokali.Add(new Lokal
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            KlubID = reader.GetInt32(reader.GetOrdinal("Klub_Id")),
                             Adresa = reader.GetString(reader.GetOrdinal("Adresa")),
-                            Lokacija = reader.GetString(reader.GetOrdinal("Lokacija"))
+                            Opstina = reader.GetString(reader.GetOrdinal("Opstina")),
+                            Grad = reader.GetString(reader.GetOrdinal("Grad"))
                         }); ;
                     }
                 }

@@ -7,6 +7,6 @@
         public DateOnly? kraj_rezervacija { get; set; }
         public string Opstina { get; set; }
         public string Adresa { get; set; }
-        public string Lokacija { get; set; }
+        public string Grad { get; set; }
     }
 }
