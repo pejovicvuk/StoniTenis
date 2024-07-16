@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Razor.Compilation;
 using StoniTenis.Models.Entities;
 using StoniTenis.Models.Services;
 using System.Data.SqlClient;
@@ -16,8 +18,15 @@ namespace StoniTenis.Controllers
             _reservationService = reservationService;
         }
 
-        [HttpGet]
-        public IActionResult Reservation()
+        [HttpGet("lokal")]
+        public IActionResult Lokal()
+        {
+            return View();
+        }
+
+        [Authorize]
+        [HttpGet("vreme")]
+        public IActionResult Vreme()
         {
             return View();
         }
