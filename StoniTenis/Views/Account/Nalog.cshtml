@@ -1,0 +1,10 @@
+﻿@using System.Security.Claims
+
+<div>
+    <p><strong>Name:</strong> @User.Identity.Name</p>
+    <p><strong>Email:</strong> @User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value</p>
+
+    <a asp-controller="Account" asp-action="Logout">Logout</a>
+
+    <a class="btn btn-primary" asp-controller="Account" asp-action="PostaniVlasnik">Postani Vlasnik</a>
+</div>

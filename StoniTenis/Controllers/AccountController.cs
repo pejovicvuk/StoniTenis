@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using StoniTenis.Models.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StoniTenis.Controllers
 {
@@ -21,9 +22,26 @@ namespace StoniTenis.Controllers
             return View();
         }
 
-        public IActionResult Reservation()
+        [Authorize]
+        public async Task<IActionResult> Nalog()
         {
+            if (!HttpContext.Session.TryGetValue("KorisnikID", out _))
+            {
+                var userClaims = User?.Identities.FirstOrDefault()?.Claims;
+                var email = userClaims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                if (email != null)
+                {
+                    HttpContext.Session.SetInt32("KorisnikID", await _korisnikService.ReturnIdAsync(email));
+                }
+            }
+
             return View();
+        }
+
+        public IActionResult PostaniVlasnik()
+        {
+            _korisnikService.PostaniVlasnik(HttpContext.Session.GetInt32("KorisnikID") ?? default(int));
+            return View("Nalog");
         }
 
         public async Task LoginWithGoogle()
@@ -49,12 +67,14 @@ namespace StoniTenis.Controllers
             var surname = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value;
             var email = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
+            HttpContext.Session.SetInt32("KorisnikID", await _korisnikService.ReturnIdAsync(email));
+
             if (!_korisnikService.KorisnikPostoji(email))
             {
                 _korisnikService.InsertKorisnik(name, surname, email, false);
             }
 
-            return RedirectToAction("Login");
+            return RedirectToAction("Nalog");
         }
 
 
