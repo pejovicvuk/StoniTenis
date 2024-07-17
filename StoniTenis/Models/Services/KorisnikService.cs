@@ -30,7 +30,7 @@ namespace StoniTenis.Models.Services
             }
         }
 
-        public void InsertKorisnik(string ime, string prezime, string email, bool vlasnik)
+        public async Task InsertKorisnik(string ime, string prezime, string email, bool vlasnik)
         {
             using (SqlConnection conn = _connectionService.GetConnection())
             {
@@ -43,7 +43,7 @@ namespace StoniTenis.Models.Services
                     cmd.Parameters.AddWithValue("@Prezime", prezime);
                     cmd.Parameters.AddWithValue("@Email", email);
                     cmd.Parameters.AddWithValue("@Vlasnik", vlasnik);
-                    cmd.ExecuteNonQuery();
+                    await cmd.ExecuteNonQueryAsync();
                 }
             }
         }

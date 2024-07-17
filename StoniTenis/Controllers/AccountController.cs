@@ -25,7 +25,7 @@ namespace StoniTenis.Controllers
         [Authorize]
         public async Task<IActionResult> Nalog()
         {
-            SetSessionID();
+            await SetSessionID();
             return View();
         }
 
@@ -58,28 +58,36 @@ namespace StoniTenis.Controllers
             var surname = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value;
             var email = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
-            SetSessionID();
+            await SetSessionID();
 
             if (!_korisnikService.KorisnikPostoji(email))
             {
-                _korisnikService.InsertKorisnik(name, surname, email, false);
+                await _korisnikService.InsertKorisnik(name, surname, email, false);
             }
 
             return RedirectToAction("Nalog");
         }
 
-        private async void SetSessionID()
+        private async Task SetSessionID()
         {
-            if (!HttpContext.Session.TryGetValue("KorisnikID", out _))
+            if (User?.Identities.FirstOrDefault()?.IsAuthenticated == true && !HttpContext.Session.TryGetValue("KorisnikID", out _))
             {
-                var userClaims = User?.Identities.FirstOrDefault()?.Claims;
-                var email = userClaims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                var userClaims = User.Identities.First().Claims;
+                var email = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
                 if (email != null)
                 {
-                    HttpContext.Session.SetInt32("KorisnikID", await _korisnikService.ReturnIdAsync(email));
+                    try
+                    {
+                        HttpContext.Session.SetInt32("KorisnikID", await _korisnikService.ReturnIdAsync(email));
+                    }
+                    catch (Exception ex)
+                    {
+                        
+                    }
                 }
             }
         }
+
 
         public async Task<IActionResult> Logout()
         {
