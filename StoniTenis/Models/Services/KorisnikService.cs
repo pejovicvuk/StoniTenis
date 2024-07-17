@@ -63,7 +63,7 @@ namespace StoniTenis.Models.Services
             }
         }
 
-        public void PostaniVlasnik(int id)
+        public async Task PostaniVlasnik(int id)
         {
             using (SqlConnection conn = _connectionService.GetConnection())
             {
@@ -73,7 +73,7 @@ namespace StoniTenis.Models.Services
                     cmd.CommandType = CommandType.StoredProcedure;
 
                     cmd.Parameters.AddWithValue("@Id", id);
-                    cmd.ExecuteNonQuery ();
+                    await cmd.ExecuteNonQueryAsync();
                 }
             }
         }

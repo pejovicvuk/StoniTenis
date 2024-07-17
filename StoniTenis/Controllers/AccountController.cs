@@ -29,9 +29,9 @@ namespace StoniTenis.Controllers
             return View();
         }
 
-        public IActionResult PostaniVlasnik()
+        public async Task<IActionResult> PostaniVlasnik()
         {
-            _korisnikService.PostaniVlasnik(HttpContext.Session.GetInt32("KorisnikID") ?? default(int));
+            await _korisnikService.PostaniVlasnik(HttpContext.Session.GetInt32("KorisnikID") ?? default(int));
             return View("Nalog");
         }
 
