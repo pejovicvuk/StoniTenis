@@ -8,7 +8,6 @@ namespace StoniTenis.Models.Services
     public class KorisnikService
     {
         private readonly ConnectionService _connectionService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public KorisnikService(ConnectionService connectionService)
         {
