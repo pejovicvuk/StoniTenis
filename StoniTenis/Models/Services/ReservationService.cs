@@ -13,34 +13,29 @@ namespace StoniTenis.Models.Services
             _connectionService = connectionService;
         }
 
-        public List<Lokal> PopuniLokale()
+        public async IAsyncEnumerable<Lokal> PopuniLokaleAsync()
         {
-            List<Lokal> lokali = new List<Lokal>();
-
             using (SqlConnection conn = _connectionService.GetConnection())
             {
-                conn.Open();
+                await conn.OpenAsync();
                 string sql = "SELECT Lokal.id, Lokal.adresa, Lokal.opstina, Lokal.grad, Klub.naziv FROM Lokal JOIN Klub ON Lokal.klub_id = Klub.id";
                 SqlCommand cmd = new SqlCommand(sql, conn);
 
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                 {
-                    while (reader.Read())
+                    while (await reader.ReadAsync())
                     {
-                        lokali.Add(new Lokal
+                        yield return new Lokal
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            KlubNaziv = reader.GetString(reader.GetOrdinal("Naziv")),
-                            Adresa = reader.GetString(reader.GetOrdinal("Adresa")),
-                            Opstina = reader.GetString(reader.GetOrdinal("Opstina")),
-                            Grad = reader.GetString(reader.GetOrdinal("Grad"))
-                        }); ;
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            KlubNaziv = reader.GetString(reader.GetOrdinal("naziv")),
+                            Adresa = reader.GetString(reader.GetOrdinal("adresa")),
+                            Opstina = reader.GetString(reader.GetOrdinal("opstina")),
+                            Grad = reader.GetString(reader.GetOrdinal("grad"))
+                        };
                     }
                 }
             }
-
-            return lokali;
         }
-       
     }
 }

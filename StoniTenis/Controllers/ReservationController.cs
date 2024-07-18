@@ -32,10 +32,16 @@ namespace StoniTenis.Controllers
         }
 
         [HttpGet("get-reservations")]
-        public JsonResult GetReservations()
+        public async Task<List<Lokal>> GetReservationsAsync()
         {
-            var lokali = _reservationService.PopuniLokale();
-            return Json(lokali);
+            var lokali = new List<Lokal>();
+
+            await foreach (Lokal lokal in _reservationService.PopuniLokaleAsync())
+            {
+                lokali.Add(lokal);
+            }
+            return lokali;
         }
+
     }
 }
