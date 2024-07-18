@@ -12,15 +12,16 @@ interface Reservation {
 
 let allData: Reservation[] = [];
 
-function loadReservationHandler(): void {
-    fetch('/api/Reservation/get-reservations')
-        .then(response => response.json())
-        .then(data => {
-            allData = data as Reservation[];
-            displayItems(allData);
-        })
-        .catch(error => console.error('Error fetching data:', error));
+async function loadReservationHandler(): Promise<void> {
+    try {
+        const response = await fetch('/api/Reservation/get-reservations');
+        const data: Reservation[] = await response.json();
+        displayItems(data);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
 }
+
 
 function displayItems(items: Reservation[]): void {
     const container = document.getElementById('resultsContainer') as HTMLDivElement;
@@ -37,12 +38,13 @@ function displayItems(items: Reservation[]): void {
         div.appendChild(p);
         container.appendChild(div);
 
-        div.addEventListener('click', function (event: MouseEvent): void {
-            localStorage.setItem('selectedLokal', JSON.stringify(item));
-            window.location.href = '/api/Reservation/vreme';
-        });
-
     }
+    container.addEventListener('click', function (event: MouseEvent): void {
+        const target = event.target as HTMLElement;
+        const child = target.closest('.item');
+
+        console.log(child);
+    });
 }
 
 
@@ -59,4 +61,4 @@ document.getElementById('searchBar')!.addEventListener('keyup', (e: KeyboardEven
     const target = e.target as HTMLInputElement;
     searchItems(target.value);
 });
-
+ 
