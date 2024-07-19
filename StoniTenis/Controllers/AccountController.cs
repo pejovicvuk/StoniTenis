@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using StoniTenis.Models.Services;
 using Microsoft.AspNetCore.Authorization;
+using StoniTenis.Models.Entities;
+using System.Data.SqlClient;
 
 namespace StoniTenis.Controllers
 {
@@ -82,7 +84,7 @@ namespace StoniTenis.Controllers
                     }
                     catch (Exception ex)
                     {
-                        
+
                     }
                 }
             }
@@ -94,5 +96,18 @@ namespace StoniTenis.Controllers
             await HttpContext.SignOutAsync();
             return RedirectToAction("Login");
         }
+
+        public async Task<IActionResult> Dashboard()
+        {
+            await SetSessionID();
+            string id = _korisnikService.GetCurrentUserID();
+            var lokali = new List<Lokal>();
+            await foreach (Lokal lokal in _korisnikService.PopuniMojeLokaleAsync(HttpContext.Session.GetInt32("KorisnikID") ?? default(int)))
+            {
+                lokali.Add(lokal);
+            }
+            return View(lokali);
+        }
+
     }
 }

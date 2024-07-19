@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.Identity.Client;
+using StoniTenis.Models.Entities;
 using System.Data;
 using System.Data.SqlClient;
+using System.Drawing;
 using System.Security.Claims;
 
 namespace StoniTenis.Models.Services
@@ -8,10 +11,18 @@ namespace StoniTenis.Models.Services
     public class KorisnikService
     {
         private readonly ConnectionService _connectionService;
+        private readonly IHttpContextAccessor _contextAccessor;
 
-        public KorisnikService(ConnectionService connectionService)
+        public KorisnikService(ConnectionService connectionService, IHttpContextAccessor contextAccessor)
         {
             _connectionService = connectionService;
+            _contextAccessor = contextAccessor;
+        }
+
+        public string GetCurrentUserID()
+        {
+            var userClaims = _contextAccessor.HttpContext?.User?.Claims;
+            return userClaims?.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
         }
 
         public bool KorisnikPostoji(string email)
@@ -73,6 +84,50 @@ namespace StoniTenis.Models.Services
 
                     cmd.Parameters.AddWithValue("@Id", id);
                     await cmd.ExecuteNonQueryAsync();
+                }
+            }
+        }
+
+        public async IAsyncEnumerable<Lokal> PopuniMojeLokaleAsync(int id)
+        {
+            using (SqlConnection conn = _connectionService.GetConnection())
+            {
+                await conn.OpenAsync();
+                string query = "select lokal.id, adresa, opstina, grad, naziv from lokal join klub on lokal.klub_id = klub.id join Korisnici on klub.korisnik_id = korisnici.id where korisnici.id = @Id";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Id", id);
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            yield return new Lokal
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("id")),
+                                KlubNaziv = reader.GetString(reader.GetOrdinal("naziv")),
+                                Adresa = reader.GetString(reader.GetOrdinal("adresa")),
+                                Opstina = reader.GetString(reader.GetOrdinal("opstina")),
+                                Grad = reader.GetString(reader.GetOrdinal("grad"))
+                            };
+                        }
+                    }
+                }
+            }
+        }
+        public async Task<bool> IsVlasnik(int id)
+        {
+            using (SqlConnection conn = _connectionService.GetConnection())
+            {
+                conn.Open();
+                string query = "select count(*) from korisnici where id = @Id and vlasnik = 1";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@ID", id);
+                    int count = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                    if (count > 0)
+                        return true;
+                    else
+                        return false;
                 }
             }
         }

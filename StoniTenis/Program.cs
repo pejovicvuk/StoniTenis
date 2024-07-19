@@ -19,11 +19,15 @@ builder.Services.AddAuthentication(options =>
 
     options.ClientId = clientId;
     options.ClientSecret = clientSecret;
+    options.Scope.Add("openid");
+    options.Scope.Add("profile");
+    options.Scope.Add("email");
 });
 
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<ConnectionService>(provider =>
     new ConnectionService(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -41,6 +45,7 @@ builder.Services.AddSession(options =>
 
 // Build the application.
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

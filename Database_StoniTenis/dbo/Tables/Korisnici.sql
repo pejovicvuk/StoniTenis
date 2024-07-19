@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[Korisnici] (
-    [id]    INT         IDENTITY (0, 1) NOT NULL,
+    [id]    INT NOT NULL IDENTITY,
     [email] VARCHAR (MAX) NOT NULL,
     [vlasnik] BIT NOT NULL, 
     [Ime] VARCHAR (MAX) NOT NULL, 

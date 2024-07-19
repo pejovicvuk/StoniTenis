@@ -1,49 +1,46 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', () => {
     loadReservationHandler();
 });
-var allData = [];
+let allData = [];
 function loadReservationHandler() {
     fetch('/api/Reservation/get-reservations')
-        .then(function (response) { return response.json(); })
-        .then(function (data) {
+        .then(response => response.json())
+        .then(data => {
         allData = data;
         displayItems(allData);
     })
-        .catch(function (error) { return console.error('Error fetching data:', error); });
+        .catch(error => console.error('Error fetching data:', error));
 }
 function displayItems(items) {
-    var container = document.getElementById('resultsContainer');
+    const container = document.getElementById('resultsContainer');
     container.innerHTML = '';
-    for (var _i = 0, items_1 = items; _i < items_1.length; _i++) {
-        var item = items_1[_i];
-        var div = document.createElement('div');
+    for (const item of items) {
+        const div = document.createElement('div');
         div.className = 'item';
-        var h2 = document.createElement('h2');
-        var p = document.createElement('p');
-        h2.innerText = "".concat(item.klubNaziv);
-        p.innerText = "".concat(item.adresa);
+        const h2 = document.createElement('h2');
+        const p = document.createElement('p');
+        h2.innerText = `${item.klubNaziv}`;
+        p.innerText = `${item.adresa}`;
         div.appendChild(h2);
         div.appendChild(p);
         container.appendChild(div);
     }
     container.addEventListener('click', function (event) {
-        var target = event.target;
-        var child = target.closest('.item');
+        const target = event.target;
+        const child = target.closest('.item');
         if (child != null) {
             console.log(child);
         }
     });
 }
 function searchItems(searchText) {
-    var filteredData = allData.filter(function (item) {
-        return item.adresa.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.opstina.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.klubNaziv.toLowerCase().includes(searchText.toLowerCase());
-    });
+    const filteredData = allData.filter(item => item.adresa.toLowerCase().includes(searchText.toLowerCase()) ||
+        item.opstina.toLowerCase().includes(searchText.toLowerCase()) ||
+        item.klubNaziv.toLowerCase().includes(searchText.toLowerCase()));
     displayItems(filteredData);
 }
-document.getElementById('searchBar').addEventListener('keyup', function (e) {
-    var target = e.target;
+document.getElementById('searchBar').addEventListener('keyup', (e) => {
+    const target = e.target;
     searchItems(target.value);
 });
 //# sourceMappingURL=ReservationLokal.js.map
