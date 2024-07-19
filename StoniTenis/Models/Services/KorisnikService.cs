@@ -19,12 +19,6 @@ namespace StoniTenis.Models.Services
             _contextAccessor = contextAccessor;
         }
 
-        public string GetCurrentUserID()
-        {
-            var userClaims = _contextAccessor.HttpContext?.User?.Claims;
-            return userClaims?.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
-        }
-
         public bool KorisnikPostoji(string email)
         {
             using (SqlConnection conn = _connectionService.GetConnection())

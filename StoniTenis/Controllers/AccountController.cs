@@ -98,7 +98,6 @@ namespace StoniTenis.Controllers
         public async Task<IActionResult> MojiLokali()
         {
             await SetSessionID();
-            string id = _korisnikService.GetCurrentUserID();
             var lokali = new List<Lokal>();
             await foreach (Lokal lokal in _korisnikService.PopuniMojeLokaleAsync(HttpContext.Session.GetInt32("KorisnikID") ?? default(int)))
             {
@@ -106,9 +105,15 @@ namespace StoniTenis.Controllers
             }
             return View(lokali);
         }
-        public IActionResult Dashboard()
+
+        public IActionResult Dashboard(int id)
         {
-            return View();
+            var model = new Lokal
+            {
+                Id = id,
+            };
+
+            return View(model);
         }
 
     }
