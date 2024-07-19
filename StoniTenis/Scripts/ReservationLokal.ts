@@ -43,6 +43,7 @@ function displayItems(items: Reservation[]): void {
         const child = target.closest('.item');
         if (child != null) {
             console.log(child);
+            //window.location.href('/Rezervation/Vreme.cshtnl?id=' + child.)
         }
     });
 }

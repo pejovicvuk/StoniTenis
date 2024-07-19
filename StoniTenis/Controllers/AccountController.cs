@@ -89,15 +89,13 @@ namespace StoniTenis.Controllers
                 }
             }
         }
-
-
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync();
             return RedirectToAction("Login");
         }
 
-        public async Task<IActionResult> Dashboard()
+        public async Task<IActionResult> MojiLokali()
         {
             await SetSessionID();
             string id = _korisnikService.GetCurrentUserID();
@@ -107,6 +105,10 @@ namespace StoniTenis.Controllers
                 lokali.Add(lokal);
             }
             return View(lokali);
+        }
+        public IActionResult Dashboard()
+        {
+            return View();
         }
 
     }
