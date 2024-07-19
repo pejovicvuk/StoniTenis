@@ -13,7 +13,7 @@ interface Reservation {
 let allData: Reservation[] = [];
 
 function loadReservationHandler(): void {
-    fetch('/api/Reservation/get-reservations')
+    fetch('get-reservations')
         .then(response => response.json())
         .then(data => {
             allData = data as Reservation[];
@@ -29,6 +29,7 @@ function displayItems(items: Reservation[]): void {
     for (const item of items) {
         const div = document.createElement('div');
         div.className = 'item';
+        div.setAttribute('data-lokal-id', item.id.toString());
         const h2 = document.createElement('h2');
         const p = document.createElement('p');
         h2.innerText = `${item.klubNaziv}`
@@ -38,15 +39,18 @@ function displayItems(items: Reservation[]): void {
         container.appendChild(div);
 
     }
-    container.addEventListener('click', function (event: MouseEvent): void {
-        const target = event.target as HTMLElement;
-        const child = target.closest('.item');
-        if (child != null) {
-            console.log(child);
-            //window.location.href('/Rezervation/Vreme.cshtnl?id=' + child.)
-        }
-    });
 }
+document.getElementById('resultsContainer')!.addEventListener('click', function (event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    const child = target.closest('.item');
+    if (child !== null) {
+        console.log(child);
+        const lokalId = child.getAttribute('data-lokal-id');
+        if (lokalId) {
+            window.location.href = `Vreme?id=${lokalId}`;
+        }
+    }
+});
 
 
 function searchItems(searchText: string): void {

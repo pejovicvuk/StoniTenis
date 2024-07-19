@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 let allData = [];
 function loadReservationHandler() {
-    fetch('/api/Reservation/get-reservations')
+    fetch('get-reservations')
         .then(response => response.json())
         .then(data => {
         allData = data;
@@ -17,6 +17,7 @@ function displayItems(items) {
     for (const item of items) {
         const div = document.createElement('div');
         div.className = 'item';
+        div.setAttribute('data-lokal-id', item.id.toString());
         const h2 = document.createElement('h2');
         const p = document.createElement('p');
         h2.innerText = `${item.klubNaziv}`;
@@ -25,15 +26,18 @@ function displayItems(items) {
         div.appendChild(p);
         container.appendChild(div);
     }
-    container.addEventListener('click', function (event) {
-        const target = event.target;
-        const child = target.closest('.item');
-        if (child != null) {
-            console.log(child);
-            //window.location.href('/Rezervation/Vreme.cshtnl?id=' + child.)
-        }
-    });
 }
+document.getElementById('resultsContainer').addEventListener('click', function (event) {
+    const target = event.target;
+    const child = target.closest('.item');
+    if (child !== null) {
+        console.log(child);
+        const lokalId = child.getAttribute('data-lokal-id');
+        if (lokalId) {
+            window.location.href = `Vreme?id=${lokalId}`;
+        }
+    }
+});
 function searchItems(searchText) {
     const filteredData = allData.filter(item => item.adresa.toLowerCase().includes(searchText.toLowerCase()) ||
         item.opstina.toLowerCase().includes(searchText.toLowerCase()) ||

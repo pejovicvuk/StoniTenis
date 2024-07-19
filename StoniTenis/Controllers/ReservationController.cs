@@ -8,7 +8,7 @@ using System.Data.SqlClient;
 namespace StoniTenis.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class ReservationController : Controller
     {
         private readonly ReservationService _reservationService;
@@ -18,17 +18,22 @@ namespace StoniTenis.Controllers
             _reservationService = reservationService;
         }
 
-        [HttpGet("lokal")]
+        [Authorize]
+        [HttpGet("Lokal")]
         public IActionResult Lokal()
         {
             return View();
         }
 
-        [Authorize]
-        [HttpGet("vreme")]
-        public IActionResult Vreme()
+        [HttpGet("Vreme")]
+        public IActionResult Vreme(int id)
         {
-            return View();
+            var model = new Lokal
+            {
+                Id = id,
+            };
+
+            return View(model); 
         }
 
         [HttpGet("get-reservations")]
