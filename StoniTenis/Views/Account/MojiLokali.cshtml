@@ -1,32 +1,70 @@
 ﻿@model List<StoniTenis.Models.Entities.Lokal> 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>My Website</title>
+    <link rel="stylesheet" href="~/css/mojiLokali.css">
+</head>
+<body>
+    <h2>Dashboard</h2>
+    <button id="addLokalBtn">Add Lokal</button>
 
+    <div id="lokalModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form  id="lokalForm" action="@Url.Action("AddLokal", "Account")" method="post">
+                <label for="klub_id">Naziv :</label>
+                <select id="klub_id" name="KlubID" required>
+                    @foreach(var klub in ViewBag.Klubovi as List<StoniTenis.Models.Entities.Klub>)
+                    {
+                        <option value="@klub.Id">@klub.Naziv</option>
+                    }
+                </select><br><br>
 
-<h2>Dashboard</h2>
-<table class="table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Naziv</th>
-            <th>Adresa</th>
-            <th>Opstina</th> 
-            <th>Grad</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var lokal in Model)
-        {
+                <label for="adresa">Adresa:</label>
+                <input type="text" id="adresa" name="adresa" required><br><br>
+
+                <label for="opstina">Opština:</label>
+                <input type="text" id="opstina" name="opstina" required><br><br>
+
+                <label for="grad">Grad:</label>
+                <input type="text" id="grad" name="grad" required><br><br>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+    <br />
+    <table class="table">
+        <thead>
             <tr>
-                <td>@lokal.Id</td>
-                <td>@lokal.KlubNaziv</td>
-                <td>@lokal.Adresa</td>
-                <td>@lokal.Opstina</td>
-                <td>@lokal.Grad</td>
-                <td>
-                    <button onclick="window.location.href='Dashboard?id=@lokal.Id'">Go to Dashboard</button>
-
-                </td>
+                <th>ID</th>
+                <th>Naziv</th>
+                <th>Adresa</th>
+                <th>Opstina</th>
+                <th>Grad</th>
+                <th>Actions</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var lokal in Model)
+            {
+                <tr>
+                    <td>@lokal.Id</td>
+                    <td>@lokal.KlubNaziv</td>
+                    <td>@lokal.Adresa</td>
+                    <td>@lokal.Opstina</td>
+                    <td>@lokal.Grad</td>
+                    <td>
+                        <button id="tabelaBtn"onclick="window.location.href='Dashboard?id=@lokal.Id'">Go to Dashboard</button>
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <script src="~/js/AddLokal.js"></script>
+</body>
+</html>

@@ -34,7 +34,7 @@ namespace StoniTenis.Models.Services
             }
         }
 
-        public async Task InsertKorisnik(string ime, string prezime, string email, bool vlasnik)
+        public async Task InsertKorisnikAsync(string ime, string prezime, string email, bool vlasnik)
         {
             using (SqlConnection conn = _connectionService.GetConnection())
             {
@@ -47,6 +47,23 @@ namespace StoniTenis.Models.Services
                     cmd.Parameters.AddWithValue("@Prezime", prezime);
                     cmd.Parameters.AddWithValue("@Email", email);
                     cmd.Parameters.AddWithValue("@Vlasnik", vlasnik);
+                    await cmd.ExecuteNonQueryAsync();
+                }
+            }
+        }
+        public async Task InsertLokalAsync(int klub_id, string adresa, string opstina, string grad)
+        {
+            using (SqlConnection conn = _connectionService.GetConnection())
+            {
+                conn.Open();
+                using (SqlCommand cmd = new SqlCommand("InsertLokal", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@klub_id", klub_id);
+                    cmd.Parameters.AddWithValue("@adresa", adresa);
+                    cmd.Parameters.AddWithValue("@opstina", opstina);
+                    cmd.Parameters.AddWithValue("@grad", grad);
                     await cmd.ExecuteNonQueryAsync();
                 }
             }
@@ -102,6 +119,30 @@ namespace StoniTenis.Models.Services
                                 Adresa = reader.GetString(reader.GetOrdinal("adresa")),
                                 Opstina = reader.GetString(reader.GetOrdinal("opstina")),
                                 Grad = reader.GetString(reader.GetOrdinal("grad"))
+                            };
+                        }
+                    }
+                }
+            }
+        }
+        public async IAsyncEnumerable<Klub> PopuniMojeKluboveAsync(int id)
+        {
+            using (SqlConnection conn = _connectionService.GetConnection())
+            {
+                await conn.OpenAsync();
+                string query = "select id, korisnik_id, naziv from Klub where korisnik_id = @Id";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Id", id);
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            yield return new Klub
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("id")),
+                                Naziv = reader.GetString(reader.GetOrdinal("naziv")),
+                                KorisnikId = reader.GetInt32(reader.GetOrdinal("korisnik_id")),
                             };
                         }
                     }

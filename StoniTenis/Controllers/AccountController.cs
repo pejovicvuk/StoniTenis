@@ -64,7 +64,7 @@ namespace StoniTenis.Controllers
 
             if (!_korisnikService.KorisnikPostoji(email))
             {
-                await _korisnikService.InsertKorisnik(name, surname, email, false);
+                await _korisnikService.InsertKorisnikAsync(name, surname, email, false);
             }
 
             return RedirectToAction("Nalog");
@@ -103,6 +103,12 @@ namespace StoniTenis.Controllers
             {
                 lokali.Add(lokal);
             }
+            var klubovi = new List<Klub>();
+            await foreach (Klub klub in _korisnikService.PopuniMojeKluboveAsync(HttpContext.Session.GetInt32("KorisnikID") ?? default(int)))
+            {
+                klubovi.Add(klub);
+            }
+            ViewBag.Klubovi = klubovi;
             return View(lokali);
         }
 
@@ -116,5 +122,11 @@ namespace StoniTenis.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> AddLokal(Lokal model)
+        {
+            await _korisnikService.InsertLokalAsync(model.KlubID, model.Adresa, model.Opstina, model.Grad);
+            return View("Nalog");
+        }
     }
 }
