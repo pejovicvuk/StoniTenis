@@ -95,6 +95,8 @@ namespace StoniTenis.Controllers
             return RedirectToAction("Login");
         }
 
+        [Authorize]
+        [HttpGet]
         public async Task<IActionResult> MojiLokali()
         {
             await SetSessionID();
