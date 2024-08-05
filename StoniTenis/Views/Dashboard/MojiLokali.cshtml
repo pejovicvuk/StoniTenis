@@ -15,7 +15,7 @@
     <div id="lokalModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <form  id="lokalForm" action="@Url.Action("AddLokal", "Account")" method="post">
+            <form  id="lokalForm" action="@Url.Action("AddLokal", "Dashboard")" method="post">
                 <label for="klub_id">Naziv :</label>
                 <select id="klub_id" name="KlubID" required>
                     @foreach(var klub in ViewBag.Klubovi as List<StoniTenis.Models.Entities.Klub>)

@@ -73,6 +73,7 @@
     <Build Include="dbo\Tables\Specijalno_Vreme.sql" />
     <Build Include="InsertKorisnik.sql" />
     <Build Include="PostaniVlasnik.sql" />
+    <Build Include="InsertLokal.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="Database_StoniTenis.refactorlog" />

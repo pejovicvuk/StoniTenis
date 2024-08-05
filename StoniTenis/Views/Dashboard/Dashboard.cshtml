@@ -1,0 +1,113 @@
+﻿@model StoniTenis.Models.Entities.Lokal
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="~/css/Dashboard.css">
+    <title>Document</title>
+</head>
+<body>
+    <ul class="accordion">
+        <li class="day-container">
+            <input type="checkbox" name="accordion" id="monday" checked>
+            <label for="monday">Ponedeljak</label>
+            <div class="content">
+                <select class="start-time">
+                    <!-- vreme je dinamicki dodato -->
+                </select>
+                <span class="to-label">to</span>
+                <select class="end-time">
+                    <!-- vreme je dinamicki dodato -->
+                </select>
+                <button id="done-button" asp-area="" asp-controller="Dashboard" asp-action="MojiLokali">Done</button>
+            </div>
+        </li>
+        <li class="day-container">
+            <input type="checkbox" name="accordion" id="tuesday">
+            <label for="tuesday">Utorak</label>
+            <div class="content">
+                <select class="start-time">
+                    <!-- vreme je dinamicki dodato -->
+                </select>
+                <span class="to-label">to</span>
+                <select class="end-time">
+                    <!-- vreme je dinamicki dodato -->
+                </select>
+                <button id="done-button">Done</button>
+            </div>
+        </li>
+        <li class="day-container">
+            <input type="checkbox" name="accordion" id="wednesday">
+            <label for="wednesday">Sreda</label>
+            <div class="content">
+                <select class="start-time">
+                    <!-- vreme je dinamicki dodato -->
+                </select>
+                <span class="to-label">to</span>
+                <select class="end-time">
+                    <!-- vreme je dinamicki dodato -->
+                </select>
+                <button id="done-button">Done</button>
+            </div>
+        </li>
+        <li class="day-container">
+            <input type="checkbox" name="accordion" id="thursday">
+            <label for="thursday">Cetvrtak</label>
+            <div class="content">
+                <select class="start-time">
+                    <!-- vreme je dinamicki dodato -->
+                </select>
+                <span class="to-label">to</span>
+                <select class="end-time">
+                    <!-- vreme je dinamicki dodato -->
+                </select>
+                <button id="done-button">Done</button>
+            </div>
+        </li>
+        <li class="day-container">
+            <input type="checkbox" name="accordion" id="friday">
+            <label for="friday">Petak</label>
+            <div class="content">
+                <select class="start-time">
+                    <!-- vreme je dinamicki dodato -->
+                </select>
+                <span class="to-label">to</span>
+                <select class="end-time">
+                    <!-- vreme je dinamicki dodato -->
+                </select>
+                <button id="done-button">Done</button>
+            </div>
+        </li>
+        <li class="day-container">
+            <input type="checkbox" name="accordion" id="Saturday">
+            <label for="Saturday">Subota</label>
+            <div class="content">
+                <select class="start-time">
+                    <!-- vreme je dinamicki dodato -->
+                </select>
+                <span class="to-label">to</span>
+                <select class="end-time">
+                    <!-- vreme je dinamicki dodato -->
+                </select>
+                <button id="done-button">Done</button>
+            </div>
+        </li>
+        <li class="day-container">
+            <input type="checkbox" name="accordion" id="sunday">
+            <label for="sunday">Nedelja</label>
+            <div class="content">
+                <select class="start-time">
+                    <!-- vreme je dinamicki dodato -->
+                </select>
+                <span class="to-label">to</span>
+                <select class="end-time">
+                    <!-- vreme je dinamicki dodato -->
+                </select>
+                <button id="done-button">Done</button>
+            </div>
+        </li>
+    </ul>
+    <script src="~/js/Dashboard.js"></script>
+</body>
+</html>

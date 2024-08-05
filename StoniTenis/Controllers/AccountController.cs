@@ -70,7 +70,7 @@ namespace StoniTenis.Controllers
             return RedirectToAction("Nalog");
         }
 
-        private async Task SetSessionID()
+        public async Task SetSessionID()
         {
             if (User?.Identities.FirstOrDefault()?.IsAuthenticated == true && !HttpContext.Session.TryGetValue("KorisnikID", out _))
             {
@@ -93,42 +93,6 @@ namespace StoniTenis.Controllers
         {
             await HttpContext.SignOutAsync();
             return RedirectToAction("Login");
-        }
-
-        [Authorize]
-        [HttpGet]
-        public async Task<IActionResult> MojiLokali()
-        {
-            await SetSessionID();
-            var lokali = new List<Lokal>();
-            await foreach (Lokal lokal in _korisnikService.PopuniMojeLokaleAsync(HttpContext.Session.GetInt32("KorisnikID") ?? default(int)))
-            {
-                lokali.Add(lokal);
-            }
-            var klubovi = new List<Klub>();
-            await foreach (Klub klub in _korisnikService.PopuniMojeKluboveAsync(HttpContext.Session.GetInt32("KorisnikID") ?? default(int)))
-            {
-                klubovi.Add(klub);
-            }
-            ViewBag.Klubovi = klubovi;
-            return View(lokali);
-        }
-
-        public IActionResult Dashboard(int id)
-        {
-            var model = new Lokal
-            {
-                Id = id,
-            };
-
-            return View(model);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> AddLokal(Lokal model)
-        {
-            await _korisnikService.InsertLokalAsync(model.KlubID, model.Adresa, model.Opstina, model.Grad);
-            return View("Nalog");
         }
     }
 }
