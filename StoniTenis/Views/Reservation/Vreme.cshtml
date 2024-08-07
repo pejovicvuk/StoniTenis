@@ -3,12 +3,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calendar</title>
+    <link rel="stylesheet" href="~/css/reservationVreme.css" />
 </head>
 <body>
-    <h2>Rezervacija za: @Model.Id</h2>
-    <script src="~/js/ReservationVreme.js"></script>
+    <h2>rezervacija za @Model.Id</h2>
+    <h1>Calendar</h1>
+    <div class="calendar">
+        <header>
+            <h3></h3>
+            <nav>
+                <button id="prev"></button>
+                <button id="next"></button>
+            </nav>
+        </header>
+        <section>
+            <ul class="days">
+                <li id="day">Sun</li>
+                <li id="day">Mon</li>
+                <li id="day">Tue</li>
+                <li id="day">Wed</li>
+                <li id="day">Thu</li>
+                <li id="day">Fri</li>
+                <li id="day">Sat</li>
+            </ul>
+            <ul class="dates"></ul>
+        </section>
+    </div>
+    <script src="~/js/ReservationVreme.js" defer></script>
 </body>
 </html>

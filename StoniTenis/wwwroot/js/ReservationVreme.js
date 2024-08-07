@@ -1,23 +1,60 @@
-//document.addEventListener('DOMContentLoaded', () => {
-//    const urlParams = new URLSearchParams(window.location.search);
-//    const lokalId = urlParams.get('id');
-//    if (lokalId) {
-//        console.log("Making reservation for Lokal ID:", lokalId);
-//        // You can now use lokalId to fetch specific data about the lokal
-//        // or set up the page according to the lokal details.
-//        fetchLokalDetails(lokalId);
-//    } else {
-//        console.log("No Lokal ID provided in URL.");
-//        // Handle cases where no ID is provided, perhaps redirect or show an error message
-//    }
-//});
-//function fetchLokalDetails(lokalId) {
-//    fetch(`/api/get-lokal-details?id=${lokalId}`)
-//        .then(response => response.json())
-//        .then(data => {
-//            console.log(data);
-//            // Here you can populate the details on the page, e.g., setting the lokal name, address, etc.
-//        })
-//        .catch(error => console.error('Failed to fetch lokal details:', error));
-//}
+const header = document.querySelector(".calendar h3");
+const dates = document.querySelector(".dates");
+const navs = document.querySelectorAll("#prev, #next");
+const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+];
+let date = new Date();
+let month = date.getMonth();
+let year = date.getFullYear();
+function renderCalendar() {
+    const start = new Date(year, month, 1).getDay();
+    const endDate = new Date(year, month + 1, 0).getDate();
+    const end = new Date(year, month, endDate).getDay();
+    const endDatePrev = new Date(year, month, 0).getDate();
+    let datesHtml = "";
+    for (let i = start; i > 0; i--) {
+        datesHtml += `<li class="inactive">${endDatePrev - i + 1}</li>`;
+    }
+    for (let i = 1; i <= endDate; i++) {
+        let className = i === date.getDate() &&
+            month === new Date().getMonth() &&
+            year === new Date().getFullYear()
+            ? ' class="today"'
+            : "";
+        datesHtml += `<li${className}>${i}</li>`;
+    }
+    for (let i = end; i < 6; i++) {
+        datesHtml += `<li class="inactive">${i - end + 1}</li>`;
+    }
+    if (dates) {
+        dates.innerHTML = datesHtml;
+    }
+    if (header) {
+        header.textContent = `${months[month]} ${year}`;
+    }
+}
+navs.forEach((nav) => {
+    nav.addEventListener("click", (e) => {
+        const target = e.target;
+        const btnId = target.id;
+        if (btnId === "prev" && month === 0) {
+            year--;
+            month = 11;
+        }
+        else if (btnId === "next" && month === 11) {
+            year++;
+            month = 0;
+        }
+        else {
+            month = btnId === "next" ? month + 1 : month - 1;
+        }
+        date = new Date(year, month, new Date().getDate());
+        year = date.getFullYear();
+        month = date.getMonth();
+        renderCalendar();
+    });
+});
+renderCalendar();
 //# sourceMappingURL=ReservationVreme.js.map
