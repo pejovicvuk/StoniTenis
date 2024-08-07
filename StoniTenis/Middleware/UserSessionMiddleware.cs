@@ -16,13 +16,13 @@ namespace StoniTenis.Middleware
         {
             if (context.User.Identity.IsAuthenticated && !context.Session.GetInt32("KorisnikID").HasValue)
             {
-                // Assuming SetSessionID is refactored to be static or you find a way to call it
                 await SetSessionID(context, korisnikService);
             }
 
-            // Call the next delegate/middleware in the pipeline
             await _next(context);
         }
+        //razumi invoke async
+
 
         public static async Task SetSessionID(HttpContext context, KorisnikService korisnikService)
         {
@@ -34,11 +34,12 @@ namespace StoniTenis.Middleware
                 {
                     int userId = await korisnikService.ReturnIdAsync(email);
                     context.Session.SetInt32("KorisnikID", userId);
+                    context.Session.SetInt32("isVlasnik", Convert.ToInt32(await korisnikService.IsVlasnik(userId)));
                     // Optionally set other session values here
                 }
                 catch (Exception ex)
                 {
-                    // Handle exceptions, possibly log them
+
                 }
             }
         }

@@ -50,9 +50,10 @@ namespace StoniTenis.Controllers
         }
 
         [HttpPost]
-        public async Task AddRadnoVreme(RadnoVreme model)
+        public async Task<IActionResult> AddRadnoVreme(RadnoVreme model)
         {
             await _vlasnikService.InsertRadnoVremeAsync(model.DanUNedelji, model.LokalID, model.VremeOtvaranja, model.VremeZatvaranja);
+            return View("MojiLokali");
         }
     }
 }

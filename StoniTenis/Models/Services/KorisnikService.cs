@@ -79,7 +79,6 @@ namespace StoniTenis.Models.Services
             }
         }
 
-        //posle
         public async Task<int> IsVlasnik(int id)
         {
             using (SqlConnection conn = _connectionService.GetConnection())

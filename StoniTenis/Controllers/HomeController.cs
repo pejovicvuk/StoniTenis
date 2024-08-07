@@ -18,6 +18,7 @@ namespace StoniTenis.Controllers
 
         public IActionResult Index()
         {
+            //int vlasniktest = Convert.ToInt16(HttpContext.Session.GetInt32("KorisnikID")); test
             return View();
         }
 

@@ -30,90 +30,119 @@
         </li>
         </form>
 
+        <form action="@Url.Action("AddRadnoVreme", "Dashboard")" method="post">
+            <input type="hidden" name="DanUNedelji" value="2">
+            <input type="hidden" name="LokalID" value="@ViewBag.LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="tuesday">
+            <input type="checkbox" name="accordion" id="tuesday" checked>
             <label for="tuesday">Utorak</label>
             <div class="content">
-                <select class="start-time">
+                <select class="start-time" name="VremeOtvaranja">
                     <!-- vreme je dinamicki dodato -->
                 </select>
                 <span class="to-label">to</span>
-                <select class="end-time">
+                <select class="end-time" name="VremeZatvaranja">
                     <!-- vreme je dinamicki dodato -->
                 </select>
-                <button id="done-button">Done</button>
+                <button type="submit" id="done-button">Done</button>
             </div>
         </li>
+        </form>
+
+        <form action="@Url.Action("AddRadnoVreme", "Dashboard")" method="post">
+            <input type="hidden" name="DanUNedelji" value="3">
+            <input type="hidden" name="LokalID" value="@ViewBag.LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="wednesday">
+            <input type="checkbox" name="accordion" id="wednesday" checked>
             <label for="wednesday">Sreda</label>
             <div class="content">
-                <select class="start-time">
+                <select class="start-time" name="VremeOtvaranja">
                     <!-- vreme je dinamicki dodato -->
                 </select>
                 <span class="to-label">to</span>
-                <select class="end-time">
+                <select class="end-time" name="VremeZatvaranja">
                     <!-- vreme je dinamicki dodato -->
                 </select>
-                <button id="done-button">Done</button>
+                <button type="submit" id="done-button">Done</button>
             </div>
         </li>
+        </form>
+
+        <form action="@Url.Action("AddRadnoVreme", "Dashboard")" method="post">
+            <input type="hidden" name="DanUNedelji" value="4">
+            <input type="hidden" name="LokalID" value="@ViewBag.LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="thursday">
+            <input type="checkbox" name="accordion" id="thursday" checked>
             <label for="thursday">Cetvrtak</label>
             <div class="content">
-                <select class="start-time">
+                <select class="start-time" name="VremeOtvaranja">
                     <!-- vreme je dinamicki dodato -->
                 </select>
                 <span class="to-label">to</span>
-                <select class="end-time">
+                <select class="end-time" name="VremeZatvaranja">
                     <!-- vreme je dinamicki dodato -->
                 </select>
-                <button id="done-button">Done</button>
+                <button type="submit" id="done-button">Done</button>
             </div>
         </li>
+        </form>
+
+        <form action="@Url.Action("AddRadnoVreme", "Dashboard")" method="post">
+            <input type="hidden" name="DanUNedelji" value="5">
+            <input type="hidden" name="LokalID" value="@ViewBag.LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="friday">
+            <input type="checkbox" name="accordion" id="friday" checked>
             <label for="friday">Petak</label>
             <div class="content">
-                <select class="start-time">
+                <select class="start-time" name="VremeOtvaranja">
                     <!-- vreme je dinamicki dodato -->
                 </select>
                 <span class="to-label">to</span>
-                <select class="end-time">
+                <select class="end-time" name="VremeZatvaranja">
                     <!-- vreme je dinamicki dodato -->
                 </select>
-                <button id="done-button">Done</button>
+                <button type="submit" id="done-button">Done</button>
             </div>
         </li>
+        </form>
+
+        <form action="@Url.Action("AddRadnoVreme", "Dashboard")" method="post">
+            <input type="hidden" name="DanUNedelji" value="6">
+            <input type="hidden" name="LokalID" value="@ViewBag.LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="Saturday">
-            <label for="Saturday">Subota</label>
+            <input type="checkbox" name="accordion" id="saturday" checked>
+            <label for="saturday">Subota</label>
             <div class="content">
-                <select class="start-time">
+                <select class="start-time" name="VremeOtvaranja">
                     <!-- vreme je dinamicki dodato -->
                 </select>
                 <span class="to-label">to</span>
-                <select class="end-time">
+                <select class="end-time" name="VremeZatvaranja">
                     <!-- vreme je dinamicki dodato -->
                 </select>
-                <button id="done-button">Done</button>
+                <button type="submit" id="done-button">Done</button>
             </div>
         </li>
+        </form>
+
+        <form action="@Url.Action("AddRadnoVreme", "Dashboard")" method="post">
+            <input type="hidden" name="DanUNedelji" value="7">
+            <input type="hidden" name="LokalID" value="@ViewBag.LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="sunday">
+            <input type="checkbox" name="accordion" id="sunday" checked>
             <label for="sunday">Nedelja</label>
             <div class="content">
-                <select class="start-time">
+                <select class="start-time" name="VremeOtvaranja">
                     <!-- vreme je dinamicki dodato -->
                 </select>
                 <span class="to-label">to</span>
-                <select class="end-time">
+                <select class="end-time" name="VremeZatvaranja">
                     <!-- vreme je dinamicki dodato -->
                 </select>
-                <button id="done-button">Done</button>
+                <button type="submit" id="done-button">Done</button>
             </div>
         </li>
+        </form>
     </ul>
     <script src="~/js/Dashboard.js"></script>
 </body>
