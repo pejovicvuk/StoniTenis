@@ -7,6 +7,8 @@ using StoniTenis.Models.Services;
 using Microsoft.AspNetCore.Authorization;
 using StoniTenis.Models.Entities;
 using System.Data.SqlClient;
+using Microsoft.AspNetCore.Http;
+using StoniTenis.Middleware;
 
 namespace StoniTenis.Controllers
 {
@@ -25,9 +27,8 @@ namespace StoniTenis.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> Nalog()
+        public IActionResult Nalog()
         {
-            await SetSessionID();
             return View();
         }
 
@@ -60,7 +61,7 @@ namespace StoniTenis.Controllers
             var surname = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value;
             var email = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
-            await SetSessionID();
+            await UserSessionMiddleware.SetSessionID(HttpContext, _korisnikService);
 
             if (!_korisnikService.KorisnikPostoji(email))
             {
@@ -68,26 +69,6 @@ namespace StoniTenis.Controllers
             }
 
             return RedirectToAction("Nalog");
-        }
-
-        public async Task SetSessionID()
-        {
-            if (User?.Identities.FirstOrDefault()?.IsAuthenticated == true && !HttpContext.Session.TryGetValue("KorisnikID", out _))
-            {
-                var userClaims = User.Identities.First().Claims;
-                var email = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-                if (email != null)
-                {
-                    try
-                    {
-                        HttpContext.Session.SetInt32("KorisnikID", await _korisnikService.ReturnIdAsync(email));
-                    }
-                    catch (Exception ex)
-                    {
-
-                    }
-                }
-            }
         }
         public async Task<IActionResult> Logout()
         {

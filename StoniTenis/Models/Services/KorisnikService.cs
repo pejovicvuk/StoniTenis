@@ -78,8 +78,9 @@ namespace StoniTenis.Models.Services
                 }
             }
         }
+
         //posle
-        public async Task<bool> IsVlasnik(int id)
+        public async Task<int> IsVlasnik(int id)
         {
             using (SqlConnection conn = _connectionService.GetConnection())
             {
@@ -90,9 +91,9 @@ namespace StoniTenis.Models.Services
                     cmd.Parameters.AddWithValue("@ID", id);
                     int count = Convert.ToInt32(await cmd.ExecuteScalarAsync());
                     if (count > 0)
-                        return true;
+                        return 1;
                     else
-                        return false;
+                        return 0;
                 }
             }
         }

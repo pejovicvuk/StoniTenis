@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using StoniTenis.Models.Services;
+using StoniTenis.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,6 +65,8 @@ app.UseSession(); // Make sure this is before UseAuthentication and UseAuthoriza
 
 app.UseAuthentication(); // If you have authentication middleware
 app.UseAuthorization();
+
+app.UseMiddleware<UserSessionMiddleware>();
 
 app.MapControllerRoute(
     name: "default",

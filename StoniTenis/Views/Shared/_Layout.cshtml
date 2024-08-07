@@ -1,4 +1,6 @@
-﻿
+﻿@using Microsoft.AspNetCore.Authentication
+@using System.Security.Claims
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -41,9 +43,13 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Reservation" asp-action="Lokal">Rezervisi</a>
                         </li>
-                         <li class="nav-item">
+
+                        @if (Context.User.Identity.IsAuthenticated && Context.Session.GetInt32("isVlasnik") == 1)
+                        {
+                            <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Dashboard" asp-action="MojiLokali">Moji Lokali</a>
-                         </li>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
