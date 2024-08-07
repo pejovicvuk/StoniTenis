@@ -8,21 +8,28 @@
     <title>Document</title>
 </head>
 <body>
+    <h2>Podesi radno vreme</h2>
     <ul class="accordion">
+
+        <form action="@Url.Action("AddRadnoVreme", "Dashboard")" method="post">
+            <input type="hidden" name="DanUNedelji" value="1">
+            <input type="hidden" name="LokalID" value="@ViewBag.LokalID">
         <li class="day-container">
             <input type="checkbox" name="accordion" id="monday" checked>
             <label for="monday">Ponedeljak</label>
             <div class="content">
-                <select class="start-time">
+                <select class="start-time" name="VremeOtvaranja">
                     <!-- vreme je dinamicki dodato -->
                 </select>
                 <span class="to-label">to</span>
-                <select class="end-time">
+                <select class="end-time" name="VremeZatvaranja">
                     <!-- vreme je dinamicki dodato -->
                 </select>
-                <button id="done-button" asp-area="" asp-controller="Dashboard" asp-action="MojiLokali">Done</button>
+                <button type="submit" id="done-button">Done</button>
             </div>
         </li>
+        </form>
+
         <li class="day-container">
             <input type="checkbox" name="accordion" id="tuesday">
             <label for="tuesday">Utorak</label>

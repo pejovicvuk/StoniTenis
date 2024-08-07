@@ -33,6 +33,7 @@ builder.Services.AddScoped<ConnectionService>(provider =>
     new ConnectionService(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddTransient<KorisnikService>();
+builder.Services.AddTransient<VlasnikService>();
 builder.Services.AddTransient<ReservationService>();
 
 builder.Services.AddDistributedMemoryCache(); // Required for session

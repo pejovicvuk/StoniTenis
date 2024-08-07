@@ -11,12 +11,10 @@ namespace StoniTenis.Models.Services
     public class KorisnikService
     {
         private readonly ConnectionService _connectionService;
-        private readonly IHttpContextAccessor _contextAccessor;
 
-        public KorisnikService(ConnectionService connectionService, IHttpContextAccessor contextAccessor)
+        public KorisnikService(ConnectionService connectionService)
         {
             _connectionService = connectionService;
-            _contextAccessor = contextAccessor;
         }
 
         public bool KorisnikPostoji(string email)
@@ -51,24 +49,6 @@ namespace StoniTenis.Models.Services
                 }
             }
         }
-        public async Task InsertLokalAsync(int klub_id, string adresa, string opstina, string grad)
-        {
-            using (SqlConnection conn = _connectionService.GetConnection())
-            {
-                conn.Open();
-                using (SqlCommand cmd = new SqlCommand("InsertLokal", conn))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-
-                    cmd.Parameters.AddWithValue("@klub_id", klub_id);
-                    cmd.Parameters.AddWithValue("@adresa", adresa);
-                    cmd.Parameters.AddWithValue("@opstina", opstina);
-                    cmd.Parameters.AddWithValue("@grad", grad);
-                    await cmd.ExecuteNonQueryAsync();
-                }
-            }
-        }
-
         public async ValueTask<int> ReturnIdAsync(string email)
         {
             using (SqlConnection conn = _connectionService.GetConnection())
@@ -98,58 +78,6 @@ namespace StoniTenis.Models.Services
                 }
             }
         }
-
-        public async IAsyncEnumerable<Lokal> PopuniMojeLokaleAsync(int id)
-        {
-            using (SqlConnection conn = _connectionService.GetConnection())
-            {
-                await conn.OpenAsync();
-                string query = "select lokal.id, adresa, opstina, grad, naziv from lokal join klub on lokal.klub_id = klub.id join Korisnici on klub.korisnik_id = korisnici.id where korisnici.id = @Id";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@Id", id);
-                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            yield return new Lokal
-                            {
-                                Id = reader.GetInt32(reader.GetOrdinal("id")),
-                                KlubNaziv = reader.GetString(reader.GetOrdinal("naziv")),
-                                Adresa = reader.GetString(reader.GetOrdinal("adresa")),
-                                Opstina = reader.GetString(reader.GetOrdinal("opstina")),
-                                Grad = reader.GetString(reader.GetOrdinal("grad"))
-                            };
-                        }
-                    }
-                }
-            }
-        }
-        public async IAsyncEnumerable<Klub> PopuniMojeKluboveAsync(int id)
-        {
-            using (SqlConnection conn = _connectionService.GetConnection())
-            {
-                await conn.OpenAsync();
-                string query = "select id, korisnik_id, naziv from Klub where korisnik_id = @Id";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@Id", id);
-                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            yield return new Klub
-                            {
-                                Id = reader.GetInt32(reader.GetOrdinal("id")),
-                                Naziv = reader.GetString(reader.GetOrdinal("naziv")),
-                                KorisnikId = reader.GetInt32(reader.GetOrdinal("korisnik_id")),
-                            };
-                        }
-                    }
-                }
-            }
-        }
-
         //posle
         public async Task<bool> IsVlasnik(int id)
         {
