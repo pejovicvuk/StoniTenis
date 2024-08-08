@@ -1,71 +1,447 @@
-﻿const header: HTMLElement | null = document.querySelector(".calendar h3");
-const dates: HTMLElement | null = document.querySelector(".dates");
-const navs: NodeListOf<HTMLElement> = document.querySelectorAll("#prev, #next");
+﻿const calendar: HTMLElement | null = document.querySelector(".calendar");
+const date: HTMLElement | null = document.querySelector(".date");
+const daysContainer: HTMLElement | null = document.querySelector(".days");
+const prev: HTMLElement | null = document.querySelector(".prev");
+const next: HTMLElement | null = document.querySelector(".next");
+const todayBtn: HTMLElement | null = document.querySelector(".today-btn");
+const gotoBtn: HTMLElement | null = document.querySelector(".goto-btn");
+const dateInput: HTMLInputElement | null = document.querySelector(".date-input");
+const eventDay: HTMLElement | null = document.querySelector(".event-day");
+const eventDate: HTMLElement | null = document.querySelector(".event-date");
+const eventsContainer: HTMLElement | null = document.querySelector(".events");
+const addEventBtn: HTMLElement | null = document.querySelector(".add-event");
+const addEventWrapper: HTMLElement | null = document.querySelector(".add-event-wrapper");
+const addEventCloseBtn: HTMLElement | null = document.querySelector(".close");
+const addEventTitle: HTMLInputElement | null = document.querySelector(".event-name");
+const addEventFrom: HTMLInputElement | null = document.querySelector(".event-time-from");
+const addEventTo: HTMLInputElement | null = document.querySelector(".event-time-to");
+const addEventSubmit: HTMLElement | null = document.querySelector(".add-event-btn");
+
+let today: Date = new Date();
+let activeDay: number | undefined;
+let month: number = today.getMonth();
+let year: number = today.getFullYear();
 
 const months: string[] = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
 ];
 
-let date: Date = new Date();
-let month: number = date.getMonth();
-let year: number = date.getFullYear();
+const eventsArr: { day: number; month: number; year: number; events: { title: string; time: string; }[]; }[] = [];
+getEvents();
+console.log(eventsArr);
 
-function renderCalendar(): void {
-    const start: number = new Date(year, month, 1).getDay();
-    const endDate: number = new Date(year, month + 1, 0).getDate();
-    const end: number = new Date(year, month, endDate).getDay();
-    const endDatePrev: number = new Date(year, month, 0).getDate();
+function initCalendar(): void {
+    const firstDay: Date = new Date(year, month, 1);
+    const lastDay: Date = new Date(year, month + 1, 0);
+    const prevLastDay: Date = new Date(year, month, 0);
+    const prevDays: number = prevLastDay.getDate();
+    const lastDate: number = lastDay.getDate();
+    const day: number = firstDay.getDay();
+    const nextDays: number = 7 - lastDay.getDay() - 1;
 
-    let datesHtml: string = "";
-
-    for (let i = start; i > 0; i--) {
-        datesHtml += `<li class="inactive">${endDatePrev - i + 1}</li>`;
+    if (date) {
+        date.innerHTML = months[month] + " " + year;
     }
 
-    for (let i = 1; i <= endDate; i++) {
-        let className: string =
-            i === date.getDate() &&
-                month === new Date().getMonth() &&
-                year === new Date().getFullYear()
-                ? ' class="today"'
-                : "";
-        datesHtml += `<li${className}>${i}</li>`;
+    let days: string = "";
+
+    for (let x: number = day; x > 0; x--) {
+        days += `<div class="day prev-date">${prevDays - x + 1}</div>`;
     }
 
-    for (let i = end; i < 6; i++) {
-        datesHtml += `<li class="inactive">${i - end + 1}</li>`;
+    for (let i: number = 1; i <= lastDate; i++) {
+        let event: boolean = false;
+        eventsArr.forEach((eventObj) => {
+            if (
+                eventObj.day === i &&
+                eventObj.month === month + 1 &&
+                eventObj.year === year
+            ) {
+                event = true;
+            }
+        });
+        if (
+            i === new Date().getDate() &&
+            year === new Date().getFullYear() &&
+            month === new Date().getMonth()
+        ) {
+            activeDay = i;
+            getActiveDay(i);
+            updateEvents(i);
+            if (event) {
+                days += `<div class="day today active event">${i}</div>`;
+            } else {
+                days += `<div class="day today active">${i}</div>`;
+            }
+        } else {
+            if (event) {
+                days += `<div class="day event">${i}</div>`;
+            } else {
+                days += `<div class="day ">${i}</div>`;
+            }
+        }
     }
 
-    if (dates) {
-        dates.innerHTML = datesHtml;
+    for (let j: number = 1; j <= nextDays; j++) {
+        days += `<div class="day next-date">${j}</div>`;
     }
-    if (header) {
-        header.textContent = `${months[month]} ${year}`;
+    if (daysContainer) {
+        daysContainer.innerHTML = days;
+    }
+    addListner();
+}
+
+function prevMonth(): void {
+    month--;
+    if (month < 0) {
+        month = 11;
+        year--;
+    }
+    initCalendar();
+}
+
+function nextMonth(): void {
+    month++;
+    if (month > 11) {
+        month = 0;
+        year++;
+    }
+    initCalendar();
+}
+
+if (prev) {
+    prev.addEventListener("click", prevMonth);
+}
+if (next) {
+    next.addEventListener("click", nextMonth);
+}
+
+initCalendar();
+
+function addListner(): void {
+    const days: NodeListOf<HTMLElement> = document.querySelectorAll(".day");
+    days.forEach((day) => {
+        day.addEventListener("click", (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            getActiveDay(Number(target.innerHTML));
+            updateEvents(Number(target.innerHTML));
+            activeDay = Number(target.innerHTML);
+            days.forEach((day) => {
+                day.classList.remove("active");
+            });
+            if (target.classList.contains("prev-date")) {
+                prevMonth();
+                setTimeout(() => {
+                    const days = document.querySelectorAll(".day");
+                    days.forEach((day) => {
+                        if (
+                            !day.classList.contains("prev-date") &&
+                            day.innerHTML === target.innerHTML
+                        ) {
+                            day.classList.add("active");
+                        }
+                    });
+                }, 100);
+            } else if (target.classList.contains("next-date")) {
+                nextMonth();
+                setTimeout(() => {
+                    const days = document.querySelectorAll(".day");
+                    days.forEach((day) => {
+                        if (
+                            !day.classList.contains("next-date") &&
+                            day.innerHTML === target.innerHTML
+                        ) {
+                            day.classList.add("active");
+                        }
+                    });
+                }, 100);
+            } else {
+                target.classList.add("active");
+            }
+        });
+    });
+}
+
+if (todayBtn) {
+    todayBtn.addEventListener("click", () => {
+        today = new Date();
+        month = today.getMonth();
+        year = today.getFullYear();
+        initCalendar();
+    });
+}
+
+if (dateInput) {
+    dateInput.addEventListener("input", (e: InputEvent) => {
+        dateInput.value = dateInput.value.replace(/[^0-9/]/g, "");
+        if (dateInput.value.length === 2) {
+            dateInput.value += "/";
+        }
+        if (dateInput.value.length > 7) {
+            dateInput.value = dateInput.value.slice(0, 7);
+        }
+        if (e.inputType === "deleteContentBackward") {
+            if (dateInput.value.length === 3) {
+                dateInput.value = dateInput.value.slice(0, 2);
+            }
+        }
+    });
+}
+
+if (gotoBtn) {
+    gotoBtn.addEventListener("click", gotoDate);
+}
+
+function gotoDate(): void {
+    const dateArr: string[] = dateInput.value.split("/");
+    if (dateArr.length === 2) {
+        if (Number(dateArr[0]) > 0 && Number(dateArr[0]) < 13 && dateArr[1].length === 4) {
+            month = Number(dateArr[0]) - 1;
+            year = Number(dateArr[1]);
+            initCalendar();
+            return;
+        }
+    }
+    alert("Invalid Date");
+}
+
+function getActiveDay(date: number): void {
+    const day: Date = new Date(year, month, date);
+    const dayName: string = day.toString().split(" ")[0];
+    if (eventDay) {
+        eventDay.innerHTML = dayName;
+    }
+    if (eventDate) {
+        eventDate.innerHTML = date + " " + months[month] + " " + year;
     }
 }
 
-navs.forEach((nav: HTMLElement) => {
-    nav.addEventListener("click", (e: Event) => {
-        const target = e.target as HTMLElement;
-        const btnId: string = target.id;
-
-        if (btnId === "prev" && month === 0) {
-            year--;
-            month = 11;
-        } else if (btnId === "next" && month === 11) {
-            year++;
-            month = 0;
-        } else {
-            month = btnId === "next" ? month + 1 : month - 1;
+function updateEvents(date: number): void {
+    let events: string = "";
+    eventsArr.forEach((event) => {
+        if (
+            date === event.day &&
+            month + 1 === event.month &&
+            year === event.year
+        ) {
+            event.events.forEach((event) => {
+                events += `<div class="event">
+            <div class="title">
+              <i class="fas fa-circle"></i>
+              <h3 class="event-title">${event.title}</h3>
+            </div>
+            <div class="event-time">
+              <span class="event-time">${event.time}</span>
+            </div>
+        </div>`;
+            });
         }
-
-        date = new Date(year, month, new Date().getDate());
-        year = date.getFullYear();
-        month = date.getMonth();
-
-        renderCalendar();
     });
+    if (events === "") {
+        events = `<div class="no-event">
+            <h3>No Events</h3>
+        </div>`;
+    }
+    if (eventsContainer) {
+        eventsContainer.innerHTML = events;
+    }
+    saveEvents();
+}
+
+if (addEventBtn) {
+    addEventBtn.addEventListener("click", () => {
+        addEventWrapper.classList.toggle("active");
+    });
+}
+
+if (addEventCloseBtn) {
+    addEventCloseBtn.addEventListener("click", () => {
+        addEventWrapper.classList.remove("active");
+    });
+}
+
+document.addEventListener("click", (e: MouseEvent) => {
+    if (e.target !== addEventBtn && addEventWrapper && !addEventWrapper.contains(e.target as Node)) {
+        addEventWrapper.classList.remove("active");
+    }
 });
 
-renderCalendar();
+if (addEventTitle) {
+    addEventTitle.addEventListener("input", (e: InputEvent) => {
+        addEventTitle.value = addEventTitle.value.slice(0, 60);
+    });
+}
+
+if (addEventFrom) {
+    addEventFrom.addEventListener("input", (e: InputEvent) => {
+        addEventFrom.value = addEventFrom.value.replace(/[^0-9:]/g, "");
+        if (addEventFrom.value.length === 2) {
+            addEventFrom.value += ":";
+        }
+        if (addEventFrom.value.length > 5) {
+            addEventFrom.value = addEventFrom.value.slice(0, 5);
+        }
+    });
+}
+
+if (addEventTo) {
+    addEventTo.addEventListener("input", (e: InputEvent) => {
+        addEventTo.value = addEventTo.value.replace(/[^0-9:]/g, "");
+        if (addEventTo.value.length === 2) {
+            addEventTo.value += ":";
+        }
+        if (addEventTo.value.length > 5) {
+            addEventTo.value = addEventTo.value.slice(0, 5);
+        }
+    });
+}
+
+if (addEventSubmit) {
+    addEventSubmit.addEventListener("click", () => {
+        const eventTitle: string = addEventTitle ? addEventTitle.value : "";
+        const eventTimeFrom: string = addEventFrom ? addEventFrom.value : "";
+        const eventTimeTo: string = addEventTo ? addEventTo.value : "";
+        if (eventTitle === "" || eventTimeFrom === "" || eventTimeTo === "") {
+            alert("Please fill all the fields");
+            return;
+        }
+
+        const timeFromArr: string[] = eventTimeFrom.split(":");
+        const timeToArr: string[] = eventTimeTo.split(":");
+        if (
+            timeFromArr.length !== 2 ||
+            timeToArr.length !== 2 ||
+            Number(timeFromArr[0]) > 23 ||
+            Number(timeFromArr[1]) > 59 ||
+            Number(timeToArr[0]) > 23 ||
+            Number(timeToArr[1]) > 59
+        ) {
+            alert("Invalid Time Format");
+            return;
+        }
+
+        const timeFrom: string = convertTime(eventTimeFrom);
+        const timeTo: string = convertTime(eventTimeTo);
+
+        let eventExist: boolean = false;
+        eventsArr.forEach((event) => {
+            if (
+                event.day === activeDay &&
+                event.month === month + 1 &&
+                event.year === year
+            ) {
+                event.events.forEach((event) => {
+                    if (event.title === eventTitle) {
+                        eventExist = true;
+                    }
+                });
+            }
+        });
+        if (eventExist) {
+            alert("Event already added");
+            return;
+        }
+        const newEvent = {
+            title: eventTitle,
+            time: timeFrom + " - " + timeTo,
+        };
+        let eventAdded: boolean = false;
+        if (eventsArr.length > 0) {
+            eventsArr.forEach((item) => {
+                if (
+                    item.day === activeDay &&
+                    item.month === month + 1 &&
+                    item.year === year
+                ) {
+                    item.events.push(newEvent);
+                    eventAdded = true;
+                }
+            });
+        }
+
+        if (!eventAdded) {
+            eventsArr.push({
+                day: activeDay,
+                month: month + 1,
+                year: year,
+                events: [newEvent],
+            });
+        }
+
+        addEventWrapper.classList.remove("active");
+        if (addEventTitle) {
+            addEventTitle.value = "";
+        }
+        if (addEventFrom) {
+            addEventFrom.value = "";
+        }
+        if (addEventTo) {
+            addEventTo.value = "";
+        }
+        updateEvents(activeDay);
+        const activeDayEl: HTMLElement | null = document.querySelector(".day.active");
+        if (activeDayEl && !activeDayEl.classList.contains("event")) {
+            activeDayEl.classList.add("event");
+        }
+    });
+}
+
+eventsContainer.addEventListener("click", (e: MouseEvent) => {
+    if ((e.target as HTMLElement).classList.contains("event")) {
+        if (confirm("Are you sure you want to delete this event?")) {
+            const eventTitle: string = (e.target as HTMLElement).children[0].children[1].innerHTML;
+            eventsArr.forEach((event) => {
+                if (
+                    event.day === activeDay &&
+                    event.month === month + 1 &&
+                    event.year === year
+                ) {
+                    event.events.forEach((item, index) => {
+                        if (item.title === eventTitle) {
+                            event.events.splice(index, 1);
+                        }
+                    });
+                    if (event.events.length === 0) {
+                        eventsArr.splice(eventsArr.indexOf(event), 1);
+                        const activeDayEl: HTMLElement | null = document.querySelector(".day.active");
+                        if (activeDayEl && activeDayEl.classList.contains("event")) {
+                            activeDayEl.classList.remove("event");
+                        }
+                    }
+                }
+            });
+            updateEvents(activeDay);
+        }
+    }
+});
+
+function saveEvents(): void {
+    localStorage.setItem("events", JSON.stringify(eventsArr));
+}
+
+function getEvents(): void {
+    if (localStorage.getItem("events") === null) {
+        return;
+    }
+    eventsArr.push(...JSON.parse(localStorage.getItem("events") as string));
+}
+
+function convertTime(time: string): string {
+    let timeArr: string[] = time.split(":");
+    let timeHour: number = Number(timeArr[0]);
+    let timeMin: string = timeArr[1];
+    let timeFormat: string = timeHour >= 12 ? "PM" : "AM";
+    timeHour = timeHour % 12 || 12;
+    return timeHour + ":" + timeMin + " " + timeFormat;
+}
