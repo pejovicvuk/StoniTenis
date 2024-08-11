@@ -1,6 +1,8 @@
-﻿using StoniTenis.Models.Entities;
+﻿using Microsoft.AspNetCore.Mvc;
+using StoniTenis.Models.Entities;
 using System.Data;
 using System.Data.SqlClient;
+
 
 namespace StoniTenis.Models.Services
 {
@@ -30,7 +32,7 @@ namespace StoniTenis.Models.Services
                 }
             }
         }
-        public async Task InsertRadnoVremeAsync(int DanUNedelji, int LokalID, TimeOnly VremeOtvaranja, TimeOnly VremeZatvaranja)
+        public async Task InsertRadnoVremeAsync(int DanUNedelji, int LokalID, TimeSpan VremeOtvaranja, TimeSpan VremeZatvaranja)
         {
             using (SqlConnection conn = _connectionService.GetConnection())
             {
@@ -39,18 +41,43 @@ namespace StoniTenis.Models.Services
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    TimeSpan VremeOtvaranjaSpan = VremeOtvaranja.ToTimeSpan();
-                    TimeSpan VremeZatvaranjaSpan = VremeZatvaranja.ToTimeSpan();
-
                     cmd.Parameters.AddWithValue("@DanUNedelji", DanUNedelji);
                     cmd.Parameters.AddWithValue("@LokalID", LokalID);
-                    cmd.Parameters.AddWithValue("@VremeOtvaranja", VremeOtvaranjaSpan);
-                    cmd.Parameters.AddWithValue("@VremeZatvaranja", VremeZatvaranjaSpan);
+                    cmd.Parameters.AddWithValue("@VremeOtvaranja", VremeOtvaranja);
+                    cmd.Parameters.AddWithValue("@VremeZatvaranja", VremeZatvaranja);
                     //cmd.Parameters.AddWithValue("@EfektivniDatum", null);
                     await cmd.ExecuteNonQueryAsync();
                 }
             }
         }
+
+        public async IAsyncEnumerable<RadnoVreme> RadnoVremePrikazi(int LokalID)
+        {
+            using (SqlConnection conn = _connectionService.GetConnection())
+            {
+                conn.Open();
+                string query = "SELECT lokal_id, dan_u_nedelji, vreme_otvaranja, vreme_zatvaranja FROM Radno_Vreme WHERE lokal_id = @LokalID ORDER BY dan_u_nedelji";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@LokalID", LokalID);
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    {
+                        var results = new List<object>();
+                        while (await reader.ReadAsync())
+                        {
+                            yield return new RadnoVreme
+                            {
+                                LokalID = reader.GetInt32(reader.GetOrdinal("lokal_id")),
+                                DanUNedelji = reader.GetInt32(reader.GetOrdinal("dan_u_nedelji")),
+                                VremeOtvaranja = reader.GetTimeSpan(reader.GetOrdinal("vreme_otvaranja")),
+                                VremeZatvaranja = reader.GetTimeSpan(reader.GetOrdinal("vreme_zatvaranja")),
+                            };
+                        }
+                    }
+                }
+            }
+        }
+
         public async IAsyncEnumerable<Lokal> PopuniMojeLokaleAsync(int id)
         {
             using (SqlConnection conn = _connectionService.GetConnection())
