@@ -40,8 +40,15 @@ namespace StoniTenis.Controllers
             {
                 radnoVremeList.Add(radnoVreme);
             }
+
+            if (!radnoVremeList.Any())
+            {
+                radnoVremeList.Add(new RadnoVreme { LokalID = id });
+            }
+
             return View(radnoVremeList);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> AddLokal(Lokal model)

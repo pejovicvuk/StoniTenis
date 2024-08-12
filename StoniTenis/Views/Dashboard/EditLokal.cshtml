@@ -8,6 +8,7 @@
     <title>Document</title>
 </head>
 <body>
+    <input type="hidden" id="lokalID" value="@Model[0].LokalID"></input>
     <h2>Podesi radno vreme</h2>
     <ul class="accordion">
 
@@ -15,7 +16,7 @@
             <input type="hidden" name="DanUNedelji" value="1">
             <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="monday" checked>
+            <input type="checkbox" name="accordion" id="1" checked>
             <label for="monday">Ponedeljak</label>
             <div class="content">
                 <select class="start-time" name="VremeOtvaranja">
@@ -34,7 +35,7 @@
             <input type="hidden" name="DanUNedelji" value="2">
             <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="tuesday" checked>
+            <input type="checkbox" name="accordion" id="2" checked>
             <label for="tuesday">Utorak</label>
             <div class="content">
                 <select class="start-time" name="VremeOtvaranja">
@@ -53,7 +54,7 @@
             <input type="hidden" name="DanUNedelji" value="3">
             <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="wednesday" checked>
+            <input type="checkbox" name="accordion" id="3" checked>
             <label for="wednesday">Sreda</label>
             <div class="content">
                 <select class="start-time" name="VremeOtvaranja">
@@ -72,7 +73,7 @@
             <input type="hidden" name="DanUNedelji" value="4">
             <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="thursday" checked>
+            <input type="checkbox" name="accordion" id="4" checked>
             <label for="thursday">Cetvrtak</label>
             <div class="content">
                 <select class="start-time" name="VremeOtvaranja">
@@ -91,7 +92,7 @@
             <input type="hidden" name="DanUNedelji" value="5">
             <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="friday" checked>
+            <input type="checkbox" name="accordion" id="5" checked>
             <label for="friday">Petak</label>
             <div class="content">
                 <select class="start-time" name="VremeOtvaranja">
@@ -110,7 +111,7 @@
             <input type="hidden" name="DanUNedelji" value="6">
             <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="saturday" checked>
+            <input type="checkbox" name="accordion" id="6" checked>
             <label for="saturday">Subota</label>
             <div class="content">
                 <select class="start-time" name="VremeOtvaranja">
@@ -129,7 +130,7 @@
             <input type="hidden" name="DanUNedelji" value="7">
             <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="sunday" checked>
+            <input type="checkbox" name="accordion" id="7" checked>
             <label for="sunday">Nedelja</label>
             <div class="content">
                 <select class="start-time" name="VremeOtvaranja">
