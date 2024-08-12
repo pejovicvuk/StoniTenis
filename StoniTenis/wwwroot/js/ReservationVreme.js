@@ -23,6 +23,8 @@ const addEventTitle = document.querySelector(".event-name");
 const addEventFrom = document.querySelector(".event-time-from");
 const addEventTo = document.querySelector(".event-time-to");
 const addEventSubmit = document.querySelector(".add-event-btn");
+const selectPocetak = document.querySelector(".start-time");
+const selectKraj = document.querySelector(".end-time");
 let today = new Date();
 let activeDay;
 let month = today.getMonth();
@@ -55,10 +57,17 @@ function initCalendar() {
         date.innerHTML = months[month] + " " + year;
     }
     let days = "";
-    for (let x = day; x > 0; x--) {
-        days += `<div class="day prev-date">${prevDays - x + 1}</div>`;
+    // Calculate the day of the week for the first day in the grid
+    const firstGridDay = new Date(year, month, 1 - day);
+    for (let x = 0; x < day; x++) {
+        let gridDate = new Date(firstGridDay);
+        gridDate.setDate(firstGridDay.getDate() + x);
+        let weekDay = ((gridDate.getDay() + 6) % 7) + 1; // Adjust day of the week calculation to start from Monday
+        days += `<div class="day prev-date" data-day-of-the-week="${weekDay}">${prevDays - x + 1}</div>`;
     }
     for (let i = 1; i <= lastDate; i++) {
+        let currentDate = new Date(year, month, i);
+        let weekDay = ((currentDate.getDay() + 6) % 7) + 1; // Monday = 1, Sunday = 7
         let event = false;
         eventsArr.forEach((eventObj) => {
             if (eventObj.day === i &&
@@ -74,23 +83,25 @@ function initCalendar() {
             getActiveDay(i);
             updateEvents(i);
             if (event) {
-                days += `<div class="day today active event">${i}</div>`;
+                days += `<div class="day today active event" data-day-of-the-week="${weekDay}">${i}</div>`;
             }
             else {
-                days += `<div class="day today active">${i}</div>`;
+                days += `<div class="day today active" data-day-of-the-week="${weekDay}">${i}</div>`;
             }
         }
         else {
             if (event) {
-                days += `<div class="day event">${i}</div>`;
+                days += `<div class="day event" data-day-of-the-week="${weekDay}">${i}</div>`;
             }
             else {
-                days += `<div class="day ">${i}</div>`;
+                days += `<div class="day" data-day-of-the-week="${weekDay}">${i}</div>`;
             }
         }
     }
     for (let j = 1; j <= nextDays; j++) {
-        days += `<div class="day next-date">${j}</div>`;
+        let nextDate = new Date(year, month + 1, j);
+        let weekDay = ((nextDate.getDay() + 6) % 7) + 1; // Monday = 1, Sunday = 7
+        days += `<div class="day next-date" data-day-of-the-week="${weekDay}">${j}</div>`;
     }
     if (daysContainer) {
         daysContainer.innerHTML = days;
@@ -128,6 +139,10 @@ function addListner() {
             getActiveDay(Number(target.innerHTML));
             updateEvents(Number(target.innerHTML));
             activeDay = Number(target.innerHTML);
+            //if (activeDay == 1) {
+            //    const newOption = new Option("test", "testValue");
+            //    selectPocetak.options.add(newOption);
+            //}
             days.forEach((day) => {
                 day.classList.remove("active");
             });
