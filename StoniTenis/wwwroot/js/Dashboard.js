@@ -2,14 +2,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const startTimeSelects = document.querySelectorAll('.start-time');
     const endTimeSelects = document.querySelectorAll('.end-time');
     // Function to populate time options
-    function populateTimeOptions(select, start, end) {
+    function populateTimeOptions(select, start, end, initialValue) {
         select.innerHTML = ''; // Clear existing options
         for (let hour = start; hour <= end; hour++) {
             for (let min = 0; min < 60; min += 30) {
                 let time = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
                 if (hour === end && min !== 0)
                     break; // Stop adding beyond the end limit
-                select.options.add(new Option(time, time));
+                let option = new Option(time, time);
+                select.options.add(option);
+                if (time === initialValue) {
+                    select.value = time; // Set the initial value if it matches
+                }
             }
         }
     }
@@ -32,6 +36,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     // Initialize end times based on the initial start times (important if the start times are pre-selected)
     startTimeSelects.forEach((select, index) => updateEndTimeOptions(select, endTimeSelects[index]));
+    function getRadnoVremeForDay(dayId) {
+        return window.radnoVremeData.find(item => item.danUNedelji.toString() === dayId);
+    }
+    startTimeSelects.forEach((select, index) => {
+        let dayId = select.closest('.day-container').querySelector('input[type="checkbox"]').id;
+        let radnoVreme = getRadnoVremeForDay(dayId);
+        let initialStart = radnoVreme ? radnoVreme.vremeOtvaranja : '06:00';
+        console.log(initialStart);
+        let initialEnd = radnoVreme ? radnoVreme.vremeZatvaranja : '06:00';
+        populateTimeOptions(select, 6, 23, initialStart);
+        populateTimeOptions(endTimeSelects[index], 6, 23, initialEnd);
+    });
 });
+export {};
 //shvati ovo!!!!
 //# sourceMappingURL=Dashboard.js.map

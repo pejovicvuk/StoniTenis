@@ -1,4 +1,4 @@
-﻿@model StoniTenis.Models.Entities.Lokal
+﻿@model List<StoniTenis.Models.Entities.RadnoVreme>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +13,7 @@
 
         <form action="@Url.Action("AddRadnoVreme", "Dashboard")" method="post">
             <input type="hidden" name="DanUNedelji" value="1">
-            <input type="hidden" name="LokalID" value="@ViewBag.LokalID">
+            <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
             <input type="checkbox" name="accordion" id="monday" checked>
             <label for="monday">Ponedeljak</label>
@@ -32,7 +32,7 @@
 
         <form action="@Url.Action("AddRadnoVreme", "Dashboard")" method="post">
             <input type="hidden" name="DanUNedelji" value="2">
-            <input type="hidden" name="LokalID" value="@ViewBag.LokalID">
+            <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
             <input type="checkbox" name="accordion" id="tuesday" checked>
             <label for="tuesday">Utorak</label>
@@ -51,7 +51,7 @@
 
         <form action="@Url.Action("AddRadnoVreme", "Dashboard")" method="post">
             <input type="hidden" name="DanUNedelji" value="3">
-            <input type="hidden" name="LokalID" value="@ViewBag.LokalID">
+            <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
             <input type="checkbox" name="accordion" id="wednesday" checked>
             <label for="wednesday">Sreda</label>
@@ -70,7 +70,7 @@
 
         <form action="@Url.Action("AddRadnoVreme", "Dashboard")" method="post">
             <input type="hidden" name="DanUNedelji" value="4">
-            <input type="hidden" name="LokalID" value="@ViewBag.LokalID">
+            <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
             <input type="checkbox" name="accordion" id="thursday" checked>
             <label for="thursday">Cetvrtak</label>
@@ -89,7 +89,7 @@
 
         <form action="@Url.Action("AddRadnoVreme", "Dashboard")" method="post">
             <input type="hidden" name="DanUNedelji" value="5">
-            <input type="hidden" name="LokalID" value="@ViewBag.LokalID">
+            <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
             <input type="checkbox" name="accordion" id="friday" checked>
             <label for="friday">Petak</label>
@@ -108,7 +108,7 @@
 
         <form action="@Url.Action("AddRadnoVreme", "Dashboard")" method="post">
             <input type="hidden" name="DanUNedelji" value="6">
-            <input type="hidden" name="LokalID" value="@ViewBag.LokalID">
+            <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
             <input type="checkbox" name="accordion" id="saturday" checked>
             <label for="saturday">Subota</label>
@@ -127,7 +127,7 @@
 
         <form action="@Url.Action("AddRadnoVreme", "Dashboard")" method="post">
             <input type="hidden" name="DanUNedelji" value="7">
-            <input type="hidden" name="LokalID" value="@ViewBag.LokalID">
+            <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
             <input type="checkbox" name="accordion" id="sunday" checked>
             <label for="sunday">Nedelja</label>
@@ -144,6 +144,10 @@
         </li>
         </form>
     </ul>
-    <script src="~/js/Dashboard.js"></script>
+    <script>
+        var radnoVremeData = @Html.Raw(Json.Serialize(Model));
+        window.radnoVremeData = radnoVremeData;
+    </script>
+    <script type="module" src="~/js/Dashboard.js"></script>
 </body>
 </html>

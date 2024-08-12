@@ -32,14 +32,15 @@ namespace StoniTenis.Controllers
             return View(lokali);
         }
 
-        public IActionResult Dashboard(int id)
+        public async Task<IActionResult> EditLokal(int id)
         {
-            var model = new Lokal
+            var radnoVremeList = new List<RadnoVreme>();
+
+            await foreach (RadnoVreme radnoVreme in _vlasnikService.RadnoVremePrikazi(id))
             {
-                Id = id,
-            };
-            ViewBag.LokalID = id;
-            return View(model);
+                radnoVremeList.Add(radnoVreme);
+            }
+            return View(radnoVremeList);
         }
 
         [HttpPost]
@@ -53,7 +54,7 @@ namespace StoniTenis.Controllers
         public async Task<IActionResult> AddRadnoVreme(RadnoVreme model)
         {
             await _vlasnikService.InsertRadnoVremeAsync(model.DanUNedelji, model.LokalID, model.VremeOtvaranja, model.VremeZatvaranja);
-            return View("MojiLokali");
+            return RedirectToAction("MojiLokali");
         }
     }
 }

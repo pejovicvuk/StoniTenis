@@ -1,15 +1,26 @@
-﻿document.addEventListener('DOMContentLoaded', () => {
+﻿export { }; // This line ensures the file is treated as a module
+declare global {
+    interface Window {
+        radnoVremeData: any; // Use 'any' or define a more specific type
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
     const startTimeSelects: NodeListOf<HTMLSelectElement> = document.querySelectorAll('.start-time');
     const endTimeSelects: NodeListOf<HTMLSelectElement> = document.querySelectorAll('.end-time');
 
     // Function to populate time options
-    function populateTimeOptions(select: HTMLSelectElement, start: number, end: number): void {
+    function populateTimeOptions(select: HTMLSelectElement, start: number, end: number, initialValue?: string): void {
         select.innerHTML = ''; // Clear existing options
         for (let hour: number = start; hour <= end; hour++) {
             for (let min: number = 0; min < 60; min += 30) {
                 let time: string = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
                 if (hour === end && min !== 0) break; // Stop adding beyond the end limit
-                select.options.add(new Option(time, time));
+                let option = new Option(time, time);
+                select.options.add(option);
+                if (time === initialValue) {
+                    select.value = time; // Set the initial value if it matches
+                }
             }
         }
     }
@@ -38,5 +49,19 @@
 
     // Initialize end times based on the initial start times (important if the start times are pre-selected)
     startTimeSelects.forEach((select: HTMLSelectElement, index: number) => updateEndTimeOptions(select, endTimeSelects[index]));
+    function getRadnoVremeForDay(dayId) {
+        return window.radnoVremeData.find(item => item.danUNedelji.toString() === dayId);
+    }
+
+    startTimeSelects.forEach((select, index) => {
+        let dayId = select.closest('.day-container').querySelector('input[type="checkbox"]').id;
+        let radnoVreme = getRadnoVremeForDay(dayId);
+        let initialStart = radnoVreme ? radnoVreme.vremeOtvaranja : '06:00';
+        console.log(initialStart);
+        let initialEnd = radnoVreme ? radnoVreme.vremeZatvaranja : '06:00';
+
+        populateTimeOptions(select, 6, 23, initialStart);
+        populateTimeOptions(endTimeSelects[index], 6, 23, initialEnd);
+    });
 });
 //shvati ovo!!!!
