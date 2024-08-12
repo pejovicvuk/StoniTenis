@@ -1,4 +1,17 @@
-﻿const calendar: HTMLElement | null = document.querySelector(".calendar");
+﻿import { RadnoVremeData } from "interfaces.js"; 
+let radnoVremeData: readonly RadnoVremeData[] = [];
+
+export function setRadnoVremeData(x: readonly RadnoVremeData[]) {
+    radnoVremeData = x;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    console.log(radnoVremeData);
+});
+
+
+const calendar: HTMLElement | null = document.querySelector(".calendar");
 const date: HTMLElement | null = document.querySelector(".date");
 const daysContainer: HTMLElement | null = document.querySelector(".days");
 const prev: HTMLElement | null = document.querySelector(".prev");
@@ -39,7 +52,6 @@ const months: string[] = [
 
 const eventsArr: { day: number; month: number; year: number; events: { title: string; time: string; }[]; }[] = [];
 getEvents();
-console.log(eventsArr);
 
 function initCalendar(): void {
     const firstDay: Date = new Date(year, month, 1);

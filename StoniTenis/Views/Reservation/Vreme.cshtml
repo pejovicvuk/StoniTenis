@@ -1,4 +1,4 @@
-﻿@model StoniTenis.Models.Entities.Lokal
+﻿@model StoniTenis.Models.Entities.Rezervacije
 
 <!DOCTYPE html>
 <html lang="en">
@@ -15,7 +15,6 @@
     <link rel="stylesheet" href="~/css/reservationVreme.css" />
 </head>
 <body>
-    <h2>rezervisi za lokal @Model.Id</h2>
     <div class="containerCalendar">
         <div class="left">
             <div class="calendar">
@@ -80,7 +79,11 @@
             <i class="fas fa-plus"></i>
         </button>
     </div>
+    <script type="module">
+        import { setRadnoVremeData } from "../js/ReservationVreme.js";
 
-    <script src="~/js/ReservationVreme.js" defer></script>
+        setRadnoVremeData(@Html.Raw(Json.Serialize(ViewBag.RadnoVremeLokal)));
+    </script>
+    <script type="module" src="~/js/ReservationVreme.js" defer></script>
 </body>
 </html>

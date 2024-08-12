@@ -43,6 +43,7 @@ namespace StoniTenis.Controllers
 
             if (!radnoVremeList.Any())
             {
+
                 radnoVremeList.Add(new RadnoVreme { LokalID = id });
             }
 

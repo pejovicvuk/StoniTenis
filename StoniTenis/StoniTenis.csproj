@@ -2,10 +2,18 @@
 
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
+    <TypeScriptTarget>ES2021</TypeScriptTarget>
+	<TypeScriptSourceRoot>.</TypeScriptSourceRoot>
+    <TypeScriptSourceMap>True</TypeScriptSourceMap>
+	<TypeScriptOutDir>wwwroot/js</TypeScriptOutDir>
   </PropertyGroup>
 
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
+    <TypeScriptTarget>ES2021</TypeScriptTarget>
+	<TypeScriptSourceRoot>.</TypeScriptSourceRoot>
+	<TypeScriptSourceMap>True</TypeScriptSourceMap>
+	<TypeScriptOutDir>wwwroot/js</TypeScriptOutDir>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -39,6 +47,10 @@
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Scripts\" />
   </ItemGroup>
 
 </Project>

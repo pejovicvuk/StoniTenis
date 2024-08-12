@@ -7,10 +7,6 @@
     "sourceMap": true,
     "target": "ES6",
     "module": "es6",
-    "lib": [ "es2017", "dom" ],
-    "outDir": "wwwroot/js"
-  },
-  "include": [
-    "scripts/**/*"
-  ]
+    "lib": [ "es2023", "dom" ]
+  }
 }

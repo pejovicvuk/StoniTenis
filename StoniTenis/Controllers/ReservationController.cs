@@ -12,10 +12,12 @@ namespace StoniTenis.Controllers
     public class ReservationController : Controller
     {
         private readonly ReservationService _reservationService;
+        private readonly VlasnikService _vlasnikService;
 
-        public ReservationController(ReservationService reservationService)
+        public ReservationController(ReservationService reservationService, VlasnikService vlasnikService)
         {
             _reservationService = reservationService;
+            _vlasnikService = vlasnikService;
         }
 
         [Authorize]
@@ -26,14 +28,19 @@ namespace StoniTenis.Controllers
         }
 
         [HttpGet("Vreme")]
-        public IActionResult Vreme(int id)
+        public async Task<IActionResult> Vreme(int id)
         {
-            var model = new Lokal
-            {
-                Id = id,
-            };
+            var radnoVremeList = new List<RadnoVreme>();
 
-            return View(model); 
+            await foreach (RadnoVreme radnoVreme in _vlasnikService.RadnoVremePrikazi(id))
+            {
+                radnoVremeList.Add(radnoVreme);
+            }
+            ViewBag.RadnoVremeLokal = radnoVremeList;
+
+            Rezervacije rezervacija = new Rezervacije();
+
+            return View(rezervacija); 
         }
 
         [HttpGet("get-reservations")]

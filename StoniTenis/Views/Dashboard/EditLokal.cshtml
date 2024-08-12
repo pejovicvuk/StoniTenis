@@ -145,10 +145,10 @@
         </li>
         </form>
     </ul>
-    <script>
-        var radnoVremeData = @Html.Raw(Json.Serialize(Model));
-        window.radnoVremeData = radnoVremeData;
+    <script type="module">
+        import { initializePage } from "../js/Dashboard.js";
+
+        initializePage(@Html.Raw(Json.Serialize(Model)));
     </script>
-    <script type="module" src="~/js/Dashboard.js"></script>
 </body>
 </html>

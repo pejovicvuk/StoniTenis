@@ -1,3 +1,10 @@
+let radnoVremeData = [];
+export function setRadnoVremeData(x) {
+    radnoVremeData = x;
+}
+document.addEventListener('DOMContentLoaded', () => {
+    console.log(radnoVremeData);
+});
 const calendar = document.querySelector(".calendar");
 const date = document.querySelector(".date");
 const daysContainer = document.querySelector(".days");
@@ -36,7 +43,6 @@ const months = [
 ];
 const eventsArr = [];
 getEvents();
-console.log(eventsArr);
 function initCalendar() {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
