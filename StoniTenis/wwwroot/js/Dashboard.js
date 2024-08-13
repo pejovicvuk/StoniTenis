@@ -8,7 +8,7 @@ export function initializePage(radnoVremeData) {
         const selectedTime = startTimeSelect.value;
         const selectedHour = parseInt(selectedTime.split(':')[0], 10);
         const selectedMinute = parseInt(selectedTime.split(':')[1], 10);
-        let startHour = selectedHour + (selectedMinute === 30 ? 1 : 0);
+        let startHour = selectedHour + (selectedMinute === 15 ? 1 : 0);
         populateTimeOptions(endTimeSelect, startHour, 23);
     }
     startTimeSelects.forEach((select, index) => {
@@ -37,7 +37,7 @@ export function initializePage(radnoVremeData) {
     function populateTimeOptions(select, start, end, initialValue) {
         select.innerHTML = '';
         for (let hour = start; hour <= end; hour++) {
-            for (let min = 0; min < 60; min += 30) {
+            for (let min = 0; min < 60; min += 15) {
                 let time = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
                 if (hour === end && min !== 0)
                     break;

@@ -302,6 +302,8 @@ if (addEventBtn) {
         const radnoVreme = radnoVremeData.find(data => data.danUNedelji === dayOfWeek);
 
         if (radnoVreme) {
+            addEventTitle.style.display = "block";
+            addEventSubmit.style.display = "block";
             selectPocetak.style.display = "block";
             selectKraj.style.display = "block";
             document.getElementById("toLabel").style.display = "block";
@@ -313,6 +315,8 @@ if (addEventBtn) {
             populateSelectOptions(selectPocetak, startTime, endTime);
             populateSelectOptions(selectKraj, startTime, endTime);
         } else {
+            addEventTitle.style.display = "none";
+            addEventSubmit.style.display = "none";
             selectPocetak.style.display = "none";
             selectKraj.style.display = "none";
             document.getElementById("toLabel").style.display = "none";
@@ -389,6 +393,7 @@ if (addEventTo) {
     });
 }
 
+//modifikuj posle kad dodas stolove
 if (addEventSubmit) {
     addEventSubmit.addEventListener("click", () => {
         const eventTitle: string = addEventTitle ? addEventTitle.value : "";
