@@ -38,6 +38,13 @@ namespace StoniTenis.Controllers
             return View("Nalog");
         }
 
+        //public async Task<IActionResult> LoginWithEmail(string email)
+        //{
+        //    int userId = await _korisnikService.ReturnIdAsync(email);
+        //    HttpContext.Session.SetInt32("KorisnikID", userId);
+        //    return View("Nalog");
+        //}
+
         public async Task LoginWithGoogle()
         {
             await HttpContext.ChallengeAsync(GoogleDefaults.AuthenticationScheme, new AuthenticationProperties()

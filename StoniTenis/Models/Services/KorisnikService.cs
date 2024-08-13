@@ -16,7 +16,6 @@ namespace StoniTenis.Models.Services
         {
             _connectionService = connectionService;
         }
-
         public bool KorisnikPostoji(string email)
         {
             using (SqlConnection conn = _connectionService.GetConnection())

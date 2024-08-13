@@ -16,8 +16,8 @@
             <input type="hidden" name="DanUNedelji" value="1">
             <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="1" checked>
-            <label for="monday">Ponedeljak</label>
+            <input type="checkbox" name="accordion" id="1" >
+            <label for="1">Ponedeljak</label>
             <div class="content">
                 <select class="start-time" name="VremeOtvaranja">
                     <!-- vreme je dinamicki dodato -->
@@ -35,8 +35,8 @@
             <input type="hidden" name="DanUNedelji" value="2">
             <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="2" checked>
-            <label for="tuesday">Utorak</label>
+            <input type="checkbox" name="accordion" id="2" >
+            <label for="2">Utorak</label>
             <div class="content">
                 <select class="start-time" name="VremeOtvaranja">
                     <!-- vreme je dinamicki dodato -->
@@ -54,8 +54,8 @@
             <input type="hidden" name="DanUNedelji" value="3">
             <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="3" checked>
-            <label for="wednesday">Sreda</label>
+            <input type="checkbox" name="accordion" id="3" >
+            <label for="3">Sreda</label>
             <div class="content">
                 <select class="start-time" name="VremeOtvaranja">
                     <!-- vreme je dinamicki dodato -->
@@ -73,8 +73,8 @@
             <input type="hidden" name="DanUNedelji" value="4">
             <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="4" checked>
-            <label for="thursday">Cetvrtak</label>
+            <input type="checkbox" name="accordion" id="4" >
+            <label for="4">Cetvrtak</label>
             <div class="content">
                 <select class="start-time" name="VremeOtvaranja">
                     <!-- vreme je dinamicki dodato -->
@@ -92,8 +92,8 @@
             <input type="hidden" name="DanUNedelji" value="5">
             <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="5" checked>
-            <label for="friday">Petak</label>
+            <input type="checkbox" name="accordion" id="5" >
+            <label for="5">Petak</label>
             <div class="content">
                 <select class="start-time" name="VremeOtvaranja">
                     <!-- vreme je dinamicki dodato -->
@@ -111,8 +111,8 @@
             <input type="hidden" name="DanUNedelji" value="6">
             <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="6" checked>
-            <label for="saturday">Subota</label>
+            <input type="checkbox" name="accordion" id="6" >
+            <label for="6">Subota</label>
             <div class="content">
                 <select class="start-time" name="VremeOtvaranja">
                     <!-- vreme je dinamicki dodato -->
@@ -130,8 +130,8 @@
             <input type="hidden" name="DanUNedelji" value="7">
             <input type="hidden" name="LokalID" value="@Model[0].LokalID">
         <li class="day-container">
-            <input type="checkbox" name="accordion" id="7" checked>
-            <label for="sunday">Nedelja</label>
+            <input type="checkbox" name="accordion" id="7" >
+            <label for="7">Nedelja</label>
             <div class="content">
                 <select class="start-time" name="VremeOtvaranja">
                     <!-- vreme je dinamicki dodato -->
@@ -150,5 +150,6 @@
 
         initializePage(@Html.Raw(Json.Serialize(Model)));
     </script>
+    <script src="~/js/Dashboard.js"></script>
 </body>
 </html>

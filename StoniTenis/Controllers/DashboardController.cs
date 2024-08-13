@@ -62,7 +62,19 @@ namespace StoniTenis.Controllers
         public async Task<IActionResult> AddRadnoVreme(RadnoVreme model)
         {
             await _vlasnikService.InsertRadnoVremeAsync(model.DanUNedelji, model.LokalID, model.VremeOtvaranja, model.VremeZatvaranja);
-            return RedirectToAction("MojiLokali");
+
+            var radnoVremeList = new List<RadnoVreme>();
+
+            await foreach (RadnoVreme radnoVreme in _vlasnikService.RadnoVremePrikazi(model.LokalID))
+            {
+                radnoVremeList.Add(radnoVreme);
+            }
+
+            if (!radnoVremeList.Any())
+            {
+                radnoVremeList.Add(new RadnoVreme { LokalID = model.LokalID });
+            }
+            return View("EditLokal", radnoVremeList);
         }
     }
 }

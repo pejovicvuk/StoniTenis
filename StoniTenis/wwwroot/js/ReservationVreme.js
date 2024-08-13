@@ -108,6 +108,7 @@ function initCalendar() {
     }
     addListner();
 }
+//gotov DOM
 function prevMonth() {
     month--;
     if (month < 0) {
@@ -257,7 +258,45 @@ function updateEvents(date) {
 if (addEventBtn) {
     addEventBtn.addEventListener("click", () => {
         addEventWrapper.classList.toggle("active");
+        const activeDay = document.querySelector(".day.active");
+        const dayOfWeek = parseInt(activeDay.getAttribute("data-day-of-the-week"), 10);
+        const radnoVreme = radnoVremeData.find(data => data.danUNedelji === dayOfWeek);
+        if (radnoVreme) {
+            selectPocetak.style.display = "block";
+            selectKraj.style.display = "block";
+            document.getElementById("toLabel").style.display = "block";
+            document.getElementById("lokalMessage").style.display = "none";
+            const startTime = radnoVreme.vremeOtvaranja.substring(0, 5);
+            const endTime = radnoVreme.vremeZatvaranja.substring(0, 5);
+            populateSelectOptions(selectPocetak, startTime, endTime);
+            populateSelectOptions(selectKraj, startTime, endTime);
+        }
+        else {
+            selectPocetak.style.display = "none";
+            selectKraj.style.display = "none";
+            document.getElementById("toLabel").style.display = "none";
+            document.getElementById("lokalMessage").style.display = "block";
+        }
     });
+}
+function populateSelectOptions(selectElement, start, end) {
+    if (!selectElement)
+        return;
+    selectElement.innerHTML = ''; // Clear existing options
+    const [startHour, startMinute] = start.split(':').map(Number);
+    const [endHour, endMinute] = end.split(':').map(Number);
+    let currentHour = startHour;
+    let currentMinute = startMinute;
+    while (currentHour < endHour || (currentHour === endHour && currentMinute <= endMinute)) {
+        const timeOption = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
+        const optionElement = new Option(timeOption, timeOption);
+        selectElement.options.add(optionElement);
+        currentMinute += 15;
+        if (currentMinute >= 60) {
+            currentMinute = 0;
+            currentHour += 1;
+        }
+    }
 }
 if (addEventCloseBtn) {
     addEventCloseBtn.addEventListener("click", () => {
