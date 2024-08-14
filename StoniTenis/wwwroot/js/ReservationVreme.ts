@@ -454,11 +454,10 @@ if (addEventSubmit) {
         const timeFrom: string = convertTime(eventTimeFrom);
         const timeTo: string = convertTime(eventTimeTo);
 
-        // Add selected tables to the event
         const newEvent = {
             title: eventTitle,
             time: `${timeFrom} - ${timeTo}`,
-            stolovi: selectedTables.slice(), // Include a copy of the selected tables
+            stolovi: selectedTables.slice(), 
         };
 
         let eventExist: boolean = false;
@@ -511,7 +510,6 @@ if (addEventSubmit) {
         selectPocetak.value = "";
         selectKraj.value = "";
 
-        // Reset selected tables
         selectedTables.length = 0;
         document.querySelectorAll('.seat.selected').forEach(seat => {
             seat.classList.remove('selected');

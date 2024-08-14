@@ -75,6 +75,8 @@
     <Build Include="PostaniVlasnik.sql" />
     <Build Include="InsertLokal.sql" />
     <Build Include="InsertRadnoVreme.sql" />
+    <Build Include="InsertRezervacija.sql" />
+    <Build Include="InsertGrupnaRezervacija.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="Database_StoniTenis.refactorlog" />
