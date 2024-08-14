@@ -79,16 +79,18 @@ const months: string[] = [
     "December",
 ];
 
-const eventsArr: {
-    day: number;
-    month: number;
-    year: number;
-    events: {
-        title: string;
-        time: string;
-        stolovi: string[];
-    }[];
+const eventsArr: { 
+    day: number; 
+    month: number; 
+    year: number; 
+    events: { 
+        title: string; 
+        time: string; 
+        stolovi?: string[]; 
+    }[]; 
 }[] = [];
+
+getEvents();
 
 function initCalendar(): void {
     const firstDay: Date = new Date(year, month, 1);
