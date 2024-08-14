@@ -10,6 +10,33 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log(radnoVremeData);
 });
 
+const selectedTables: string[] = [];
+
+function setupSeatSelection(): void {
+    const seats = document.querySelectorAll('.seat');
+
+    seats.forEach(seat => {
+        seat.addEventListener('click', () => {
+            const seatElement = seat as HTMLElement;
+            const seatId = seatElement.id;
+
+            if (seatElement.classList.contains('selected')) {
+                seatElement.classList.remove('selected');
+                const index = selectedTables.indexOf(seatId);
+                if (index > -1) {
+                    selectedTables.splice(index, 1);
+                }
+            } else {
+                seatElement.classList.add('selected');
+                selectedTables.push(seatId);
+            }
+
+            console.log('Selected Tables:', selectedTables);
+        });
+    });
+}
+
+setupSeatSelection();
 
 const calendar: HTMLElement | null = document.querySelector(".calendar");
 const date: HTMLElement | null = document.querySelector(".date");
@@ -52,8 +79,16 @@ const months: string[] = [
     "December",
 ];
 
-const eventsArr: { day: number; month: number; year: number; events: { title: string; time: string; }[]; }[] = [];
-getEvents();
+const eventsArr: {
+    day: number;
+    month: number;
+    year: number;
+    events: {
+        title: string;
+        time: string;
+        stolovi: string[];
+    }[];
+}[] = [];
 
 function initCalendar(): void {
     const firstDay: Date = new Date(year, month, 1);
@@ -126,10 +161,6 @@ function initCalendar(): void {
     }
     addListner();
 }
-
-//gotov DOM
-
-
 function prevMonth(): void {
     month--;
     if (month < 0) {
@@ -138,7 +169,6 @@ function prevMonth(): void {
     }
     initCalendar();
 }
-
 function nextMonth(): void {
     month++;
     if (month > 11) {
@@ -165,12 +195,6 @@ function addListner(): void {
             getActiveDay(Number(target.innerHTML));
             updateEvents(Number(target.innerHTML));
             activeDay = Number(target.innerHTML);
-
-            //if (activeDay == 1) {
-            //    const newOption = new Option("test", "testValue");
-            //    selectPocetak.options.add(newOption);
-            //}
-
             days.forEach((day) => {
                 day.classList.remove("active");
             });
@@ -262,7 +286,8 @@ function getActiveDay(date: number): void {
 }
 
 function updateEvents(date: number): void {
-    let events: string = "";
+    let events = "";
+
     eventsArr.forEach((event) => {
         if (
             date === event.day &&
@@ -270,26 +295,30 @@ function updateEvents(date: number): void {
             year === event.year
         ) {
             event.events.forEach((event) => {
+                const stolovi = event.stolovi ? `Stolovi: ${event.stolovi.join(', ')}` : '';
                 events += `<div class="event">
-            <div class="title">
-              <i class="fas fa-circle"></i>
-              <h3 class="event-title">${event.title}</h3>
-            </div>
-            <div class="event-time">
-              <span class="event-time">${event.time}</span>
-            </div>
-        </div>`;
+                    <div class="title">
+                        <i class="fas fa-circle"></i>
+                        <h3 class="event-title">${event.title}</h3>
+                    </div>
+                    <div class="event-time">
+                        <span class="event-time">${event.time}</span>
+                        <br>
+                        <span class="event-tables">${stolovi}</span>
+                    </div>
+                </div>`;
             });
         }
     });
+
     if (events === "") {
-        events = `<div class="no-event">
-            <h3>No Events</h3>
-        </div>`;
+        events = `<div class="no-event"><h3>No Events</h3></div>`;
     }
+
     if (eventsContainer) {
         eventsContainer.innerHTML = events;
     }
+
     saveEvents();
 }
 
@@ -328,7 +357,7 @@ if (addEventBtn) {
 function populateSelectOptions(selectElement, start, end) {
     if (!selectElement) return;
 
-    selectElement.innerHTML = ''; // Clear existing options
+    selectElement.innerHTML = '';
 
     const [startHour, startMinute] = start.split(':').map(Number);
     const [endHour, endMinute] = end.split(':').map(Number);
@@ -397,8 +426,9 @@ if (addEventTo) {
 if (addEventSubmit) {
     addEventSubmit.addEventListener("click", () => {
         const eventTitle: string = addEventTitle ? addEventTitle.value : "";
-        const eventTimeFrom: string = addEventFrom ? addEventFrom.value : "";
-        const eventTimeTo: string = addEventTo ? addEventTo.value : "";
+        const eventTimeFrom: string = selectPocetak ? selectPocetak.value : "";
+        const eventTimeTo: string = selectKraj ? selectKraj.value : "";
+
         if (eventTitle === "" || eventTimeFrom === "" || eventTimeTo === "") {
             alert("Please fill all the fields");
             return;
@@ -406,6 +436,7 @@ if (addEventSubmit) {
 
         const timeFromArr: string[] = eventTimeFrom.split(":");
         const timeToArr: string[] = eventTimeTo.split(":");
+
         if (
             timeFromArr.length !== 2 ||
             timeToArr.length !== 2 ||
@@ -421,7 +452,15 @@ if (addEventSubmit) {
         const timeFrom: string = convertTime(eventTimeFrom);
         const timeTo: string = convertTime(eventTimeTo);
 
+        // Add selected tables to the event
+        const newEvent = {
+            title: eventTitle,
+            time: `${timeFrom} - ${timeTo}`,
+            stolovi: selectedTables.slice(), // Include a copy of the selected tables
+        };
+
         let eventExist: boolean = false;
+
         eventsArr.forEach((event) => {
             if (
                 event.day === activeDay &&
@@ -435,15 +474,14 @@ if (addEventSubmit) {
                 });
             }
         });
+
         if (eventExist) {
             alert("Event already added");
             return;
         }
-        const newEvent = {
-            title: eventTitle,
-            time: timeFrom + " - " + timeTo,
-        };
+
         let eventAdded: boolean = false;
+
         if (eventsArr.length > 0) {
             eventsArr.forEach((item) => {
                 if (
@@ -459,7 +497,7 @@ if (addEventSubmit) {
 
         if (!eventAdded) {
             eventsArr.push({
-                day: activeDay,
+                day: activeDay!,
                 month: month + 1,
                 year: year,
                 events: [newEvent],
@@ -467,17 +505,18 @@ if (addEventSubmit) {
         }
 
         addEventWrapper.classList.remove("active");
-        if (addEventTitle) {
-            addEventTitle.value = "";
-        }
-        if (addEventFrom) {
-            addEventFrom.value = "";
-        }
-        if (addEventTo) {
-            addEventTo.value = "";
-        }
-        updateEvents(activeDay);
-        const activeDayEl: HTMLElement | null = document.querySelector(".day.active");
+        addEventTitle.value = "";
+        selectPocetak.value = "";
+        selectKraj.value = "";
+
+        // Reset selected tables
+        selectedTables.length = 0;
+        document.querySelectorAll('.seat.selected').forEach(seat => {
+            seat.classList.remove('selected');
+        });
+
+        updateEvents(activeDay!);
+        const activeDayEl = document.querySelector(".day.active");
         if (activeDayEl && !activeDayEl.classList.contains("event")) {
             activeDayEl.classList.add("event");
         }

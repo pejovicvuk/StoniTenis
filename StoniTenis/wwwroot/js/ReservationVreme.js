@@ -5,6 +5,29 @@ export function setRadnoVremeData(x) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log(radnoVremeData);
 });
+const selectedTables = [];
+function setupSeatSelection() {
+    const seats = document.querySelectorAll('.seat');
+    seats.forEach(seat => {
+        seat.addEventListener('click', () => {
+            const seatElement = seat;
+            const seatId = seatElement.id;
+            if (seatElement.classList.contains('selected')) {
+                seatElement.classList.remove('selected');
+                const index = selectedTables.indexOf(seatId);
+                if (index > -1) {
+                    selectedTables.splice(index, 1);
+                }
+            }
+            else {
+                seatElement.classList.add('selected');
+                selectedTables.push(seatId);
+            }
+            console.log('Selected Tables:', selectedTables);
+        });
+    });
+}
+setupSeatSelection();
 const calendar = document.querySelector(".calendar");
 const date = document.querySelector(".date");
 const daysContainer = document.querySelector(".days");
@@ -44,7 +67,6 @@ const months = [
     "December",
 ];
 const eventsArr = [];
-getEvents();
 function initCalendar() {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
@@ -108,7 +130,6 @@ function initCalendar() {
     }
     addListner();
 }
-//gotov DOM
 function prevMonth() {
     month--;
     if (month < 0) {
@@ -140,10 +161,6 @@ function addListner() {
             getActiveDay(Number(target.innerHTML));
             updateEvents(Number(target.innerHTML));
             activeDay = Number(target.innerHTML);
-            //if (activeDay == 1) {
-            //    const newOption = new Option("test", "testValue");
-            //    selectPocetak.options.add(newOption);
-            //}
             days.forEach((day) => {
                 day.classList.remove("active");
             });
@@ -233,22 +250,23 @@ function updateEvents(date) {
             month + 1 === event.month &&
             year === event.year) {
             event.events.forEach((event) => {
+                const stolovi = event.stolovi ? `Stolovi: ${event.stolovi.join(', ')}` : '';
                 events += `<div class="event">
-            <div class="title">
-              <i class="fas fa-circle"></i>
-              <h3 class="event-title">${event.title}</h3>
-            </div>
-            <div class="event-time">
-              <span class="event-time">${event.time}</span>
-            </div>
-        </div>`;
+                    <div class="title">
+                        <i class="fas fa-circle"></i>
+                        <h3 class="event-title">${event.title}</h3>
+                    </div>
+                    <div class="event-time">
+                        <span class="event-time">${event.time}</span>
+                        <br>
+                        <span class="event-tables">${stolovi}</span>
+                    </div>
+                </div>`;
             });
         }
     });
     if (events === "") {
-        events = `<div class="no-event">
-            <h3>No Events</h3>
-        </div>`;
+        events = `<div class="no-event"><h3>No Events</h3></div>`;
     }
     if (eventsContainer) {
         eventsContainer.innerHTML = events;
@@ -286,7 +304,7 @@ if (addEventBtn) {
 function populateSelectOptions(selectElement, start, end) {
     if (!selectElement)
         return;
-    selectElement.innerHTML = ''; // Clear existing options
+    selectElement.innerHTML = '';
     const [startHour, startMinute] = start.split(':').map(Number);
     const [endHour, endMinute] = end.split(':').map(Number);
     let currentHour = startHour;
@@ -343,8 +361,8 @@ if (addEventTo) {
 if (addEventSubmit) {
     addEventSubmit.addEventListener("click", () => {
         const eventTitle = addEventTitle ? addEventTitle.value : "";
-        const eventTimeFrom = addEventFrom ? addEventFrom.value : "";
-        const eventTimeTo = addEventTo ? addEventTo.value : "";
+        const eventTimeFrom = selectPocetak ? selectPocetak.value : "";
+        const eventTimeTo = selectKraj ? selectKraj.value : "";
         if (eventTitle === "" || eventTimeFrom === "" || eventTimeTo === "") {
             alert("Please fill all the fields");
             return;
@@ -362,6 +380,12 @@ if (addEventSubmit) {
         }
         const timeFrom = convertTime(eventTimeFrom);
         const timeTo = convertTime(eventTimeTo);
+        // Add selected tables to the event
+        const newEvent = {
+            title: eventTitle,
+            time: `${timeFrom} - ${timeTo}`,
+            stolovi: selectedTables.slice(), // Include a copy of the selected tables
+        };
         let eventExist = false;
         eventsArr.forEach((event) => {
             if (event.day === activeDay &&
@@ -378,10 +402,6 @@ if (addEventSubmit) {
             alert("Event already added");
             return;
         }
-        const newEvent = {
-            title: eventTitle,
-            time: timeFrom + " - " + timeTo,
-        };
         let eventAdded = false;
         if (eventsArr.length > 0) {
             eventsArr.forEach((item) => {
@@ -402,15 +422,14 @@ if (addEventSubmit) {
             });
         }
         addEventWrapper.classList.remove("active");
-        if (addEventTitle) {
-            addEventTitle.value = "";
-        }
-        if (addEventFrom) {
-            addEventFrom.value = "";
-        }
-        if (addEventTo) {
-            addEventTo.value = "";
-        }
+        addEventTitle.value = "";
+        selectPocetak.value = "";
+        selectKraj.value = "";
+        // Reset selected tables
+        selectedTables.length = 0;
+        document.querySelectorAll('.seat.selected').forEach(seat => {
+            seat.classList.remove('selected');
+        });
         updateEvents(activeDay);
         const activeDayEl = document.querySelector(".day.active");
         if (activeDayEl && !activeDayEl.classList.contains("event")) {

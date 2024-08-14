@@ -1,5 +1,5 @@
 ﻿:root {
-    --primary-clr: #b38add;
+    --primary-clr: #1560BD;
 }
 .containerCalendar {
     position: relative;
@@ -399,19 +399,21 @@
 
 .add-event-wrapper {
     position: absolute;
-    bottom: 100px;
+    bottom: 50px;
     left: 50%;
     width: 90%;
     max-height: 0;
     overflow: hidden;
-    border-radius: 5px;
+    border-radius: 10px;
     background-color: #fff;
     transform: translateX(-50%);
-    transition: max-height 0.5s ease;
+    transition: max-height 0.5s ease, padding 0.5s ease;
+    padding: 0; /* Start with no padding to make the opening smoother */
 }
 
     .add-event-wrapper.active {
-        max-height: 300px;
+        max-height: 600px; /* Increase this to allow for the extra content */
+        padding: 20px; /* Add padding when active */
     }
 
 .add-event-header {
@@ -444,8 +446,7 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    padding: 20px;
+    gap: 20px; /* Add more gap to space out elements */
 }
 
     .add-event-body .add-event-input {
@@ -599,3 +600,40 @@
         padding: 20px;
     }
 }
+/*stolovi*/
+.containerStolovi {
+    display: flex;
+    flex-wrap: wrap;
+    border: 2px solid #ccc;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: auto;
+    height: auto;
+    width: 300px;
+    justify-content: center;
+    background-color: #f5f5f5;
+}
+
+.seat {
+    background-color: #f8ab69;
+    height: 30px;
+    width: 54px;
+    margin: 10px;
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+    .seat:hover {
+        background-color: #ffd800;
+        transform: scale(1.1);
+    }
+    .seat.selected {
+        background-color: #ffd800; 
+        transform: scale(1.1);
+    }
