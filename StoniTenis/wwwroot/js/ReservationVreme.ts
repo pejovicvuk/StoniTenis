@@ -1,13 +1,22 @@
-﻿import { RadnoVremeData } from "interfaces.js"; 
+﻿import { RadnoVremeData } from "interfaces.js";
+
 let radnoVremeData: readonly RadnoVremeData[] = [];
 
-export function setRadnoVremeData(x: readonly RadnoVremeData[]) {
-    radnoVremeData = x;
+export let userImePrezime: string;
+export let userID: number;
+
+export function setRadnoVremeData(data: readonly RadnoVremeData[]) {
+    radnoVremeData = data;
+}
+export function setUserDetails(imePrezime: string, id: number): void {
+    userImePrezime = imePrezime;
+    userID = id;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
 
-    console.log(radnoVremeData);
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('User ID:', userID);
+    console.log('User Name:', userImePrezime);
 });
 
 const selectedTables: string[] = [];
@@ -30,8 +39,6 @@ function setupSeatSelection(): void {
                 seatElement.classList.add('selected');
                 selectedTables.push(seatId);
             }
-
-            console.log('Selected Tables:', selectedTables);
         });
     });
 }
@@ -86,6 +93,7 @@ const eventsArr: {
     events: { 
         title: string; 
         time: string; 
+        korisnikID: number;
         stolovi?: string[]; 
     }[]; 
 }[] = [];
@@ -457,7 +465,8 @@ if (addEventSubmit) {
         const newEvent = {
             title: eventTitle,
             time: `${timeFrom} - ${timeTo}`,
-            stolovi: selectedTables.slice(), 
+            korisnikID: userID, // Include korisnikID here
+            stolovi: selectedTables.slice(),
         };
 
         let eventExist: boolean = false;
@@ -523,6 +532,7 @@ if (addEventSubmit) {
     });
 }
 
+
 eventsContainer.addEventListener("click", (e: MouseEvent) => {
     if ((e.target as HTMLElement).classList.contains("event")) {
         if (confirm("Are you sure you want to delete this event?")) {
@@ -554,6 +564,7 @@ eventsContainer.addEventListener("click", (e: MouseEvent) => {
 
 function saveEvents(): void {
     localStorage.setItem("events", JSON.stringify(eventsArr));
+    console.log(eventsArr);
 }
 
 function getEvents(): void {

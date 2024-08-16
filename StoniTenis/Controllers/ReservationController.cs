@@ -54,6 +54,11 @@ namespace StoniTenis.Controllers
             }
             return lokali;
         }
+        [HttpPost("add-reservation")]
+        public async Task AddReservationAsync(Rezervacije model)
+        {
+            
+        }
 
     }
 }

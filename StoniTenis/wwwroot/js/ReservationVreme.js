@@ -1,9 +1,16 @@
 let radnoVremeData = [];
-export function setRadnoVremeData(x) {
-    radnoVremeData = x;
+export let userImePrezime;
+export let userID;
+export function setRadnoVremeData(data) {
+    radnoVremeData = data;
+}
+export function setUserDetails(imePrezime, id) {
+    userImePrezime = imePrezime;
+    userID = id;
 }
 document.addEventListener('DOMContentLoaded', () => {
-    console.log(radnoVremeData);
+    console.log('User ID:', userID);
+    console.log('User Name:', userImePrezime);
 });
 const selectedTables = [];
 function setupSeatSelection() {
@@ -23,7 +30,6 @@ function setupSeatSelection() {
                 seatElement.classList.add('selected');
                 selectedTables.push(seatId);
             }
-            console.log('Selected Tables:', selectedTables);
         });
     });
 }
@@ -381,11 +387,11 @@ if (addEventSubmit) {
         }
         const timeFrom = convertTime(eventTimeFrom);
         const timeTo = convertTime(eventTimeTo);
-        // Add selected tables to the event
         const newEvent = {
             title: eventTitle,
             time: `${timeFrom} - ${timeTo}`,
-            stolovi: selectedTables.slice(), // Include a copy of the selected tables
+            korisnikID: userID, // Include korisnikID here
+            stolovi: selectedTables.slice(),
         };
         let eventExist = false;
         eventsArr.forEach((event) => {
@@ -426,7 +432,6 @@ if (addEventSubmit) {
         addEventTitle.value = "";
         selectPocetak.value = "";
         selectKraj.value = "";
-        // Reset selected tables
         selectedTables.length = 0;
         document.querySelectorAll('.seat.selected').forEach(seat => {
             seat.classList.remove('selected');
@@ -466,6 +471,7 @@ eventsContainer.addEventListener("click", (e) => {
 });
 function saveEvents() {
     localStorage.setItem("events", JSON.stringify(eventsArr));
+    console.log(eventsArr);
 }
 function getEvents() {
     if (localStorage.getItem("events") === null) {

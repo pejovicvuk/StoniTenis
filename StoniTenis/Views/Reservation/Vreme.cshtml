@@ -98,9 +98,13 @@
         </button>
     </div>
     <script type="module">
-        import { setRadnoVremeData } from "../js/ReservationVreme.js";
+        import { setRadnoVremeData, setUserDetails } from "../js/ReservationVreme.js";
 
         setRadnoVremeData(@Html.Raw(Json.Serialize(ViewBag.RadnoVremeLokal)));
+        const userName = @Html.Raw(Json.Serialize(User.Identity.Name));
+        const userId = @Context.Session.GetInt32("KorisnikID");
+
+        setUserDetails(userName, userId);
     </script>
     <script type="module" src="~/js/ReservationVreme.js" defer></script>
     <script src="~/js/ReservationVremeStolovi.js" defer></script>
