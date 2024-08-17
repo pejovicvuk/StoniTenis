@@ -15,7 +15,8 @@ export function setUserDetails(imePrezime: string, id: number): void {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('User ID:', userID);
     console.log('User Name:', userImePrezime);
-    fetchReservationsFromServer(); // Fetch reservations from the server
+    initCalendar();
+    fetchReservationsFromServer(); 
 });
 
 const selectedTables: string[] = [];
@@ -269,8 +270,6 @@ if (prev) {
 if (next) {
     next.addEventListener("click", nextMonth);
 }
-
-initCalendar();
 
 function addListner(): void {
     const days: NodeListOf<HTMLElement> = document.querySelectorAll(".day");
