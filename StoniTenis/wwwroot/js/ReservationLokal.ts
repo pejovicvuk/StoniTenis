@@ -13,7 +13,7 @@ interface Reservation {
 let allData: Reservation[] = [];
 
 function loadReservationHandler(): void {
-    fetch('get-reservations')
+    fetch('get-lokal')
         .then(response => response.json())
         .then(data => {
             allData = data as Reservation[];

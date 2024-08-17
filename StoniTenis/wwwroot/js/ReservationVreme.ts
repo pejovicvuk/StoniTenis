@@ -1,7 +1,6 @@
 ﻿import { RadnoVremeData } from "interfaces.js";
 
 let radnoVremeData: readonly RadnoVremeData[] = [];
-
 export let userImePrezime: string;
 export let userID: number;
 
@@ -13,20 +12,10 @@ export function setUserDetails(imePrezime: string, id: number): void {
     userID = id;
 }
 
-
 document.addEventListener('DOMContentLoaded', () => {
     console.log('User ID:', userID);
     console.log('User Name:', userImePrezime);
-    const lokalID = Number(urlParams.get('id'));
-
-    const reservations = createReservationAndGroupReservationJson(eventsArr);
-
-    if (reservations) {
-        reservations.forEach(reservation => {
-            sendReservationToServer(reservation.reservationData);
-            //sendGroupReservationToServer(reservation.groupReservationData);
-        });
-    }
+    fetchReservationsFromServer(); // Fetch reservations from the server
 });
 
 const selectedTables: string[] = [];
@@ -55,8 +44,6 @@ function setupSeatSelection(): void {
 setupSeatSelection();
 
 const urlParams = new URLSearchParams(window.location.search);
-
-
 const calendar: HTMLElement | null = document.querySelector(".calendar");
 const date: HTMLElement | null = document.querySelector(".date");
 const daysContainer: HTMLElement | null = document.querySelector(".days");
@@ -77,6 +64,7 @@ const addEventTo: HTMLInputElement | null = document.querySelector(".event-time-
 const addEventSubmit: HTMLElement | null = document.querySelector(".add-event-btn");
 const selectPocetak: HTMLSelectElement | null = document.querySelector(".start-time");
 const selectKraj: HTMLSelectElement | null = document.querySelector(".end-time");
+const stolovi: HTMLElement | null = document.querySelector(".containerStolovi");
 
 let today: Date = new Date();
 let activeDay: number | undefined;
@@ -96,26 +84,94 @@ const months: string[] = [
     "October",
     "November",
     "December",
-
 ];
 
-const eventsArr: { 
-    day: number; 
-    month: number; 
-    year: number; 
-    events: { 
-        title: string; 
-        time: string; 
+const eventsArr: {
+    day: number;
+    month: number;
+    year: number;
+    events: {
+        title: string;
+        time: string;
         korisnikID: number;
         lokalID: number;
-        stolovi?: string[]; 
-    }[]; 
+        stolovi?: string[];
+    }[];
 }[] = [];
 
-getEvents();
+//uzimanje rezervacija serveru
+function fetchReservationsFromServer(): void {
+    fetch('/Reservation/get-reservation', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                updateReservationsArray(data);
+                updateCalendarWithReservations();
+                initCalendar();
+            } else {
+                console.log("No reservations found");
+            }
+        })
+        .catch((error) => {
+            console.error('Error fetching reservations:', error);
+        });
+}
 
+function updateReservationsArray(reservations: any[]): void {
+    eventsArr.length = 0; // Clear existing events
 
- 
+    reservations.forEach(reservation => {
+        const date = new Date(reservation.datum);
+        const day = date.getDate();
+        const month = date.getMonth() + 1;
+        const year = date.getFullYear();
+
+        const event = {
+            title: userImePrezime,
+            time: `${reservation.pocetak} - ${reservation.kraj}`,
+            korisnikID: reservation.korisnici_id,
+            lokalID: reservation.lokal_id,
+            stolovi: reservation.stolovi
+        };
+
+        let eventAdded = false;
+
+        eventsArr.forEach(item => {
+            if (item.day === day && item.month === month && item.year === year) {
+                item.events.push(event);
+                eventAdded = true;
+            }
+        });
+
+        if (!eventAdded) {
+            eventsArr.push({
+                day: day,
+                month: month,
+                year: year,
+                events: [event]
+            });
+        }
+    });
+}
+
+function updateCalendarWithReservations(): void {
+    if (activeDay) {
+        updateEvents(activeDay);
+    } else {
+        initCalendar();
+    }
+}
+
 function initCalendar(): void {
     const firstDay: Date = new Date(year, month, 1);
     const lastDay: Date = new Date(year, month + 1, 0);
@@ -137,13 +193,13 @@ function initCalendar(): void {
     for (let x: number = 0; x < day; x++) {
         let gridDate = new Date(firstGridDay);
         gridDate.setDate(firstGridDay.getDate() + x);
-        let weekDay = ((gridDate.getDay() + 6) % 7) + 1;  // Adjust day of the week calculation to start from Monday
+        let weekDay = ((gridDate.getDay() + 6) % 7) + 1;
         days += `<div class="day prev-date" data-day-of-the-week="${weekDay}">${prevDays - x + 1}</div>`;
     }
 
     for (let i: number = 1; i <= lastDate; i++) {
         let currentDate = new Date(year, month, i);
-        let weekDay = ((currentDate.getDay() + 6) % 7) + 1;  // Monday = 1, Sunday = 7
+        let weekDay = ((currentDate.getDay() + 6) % 7) + 1;
         let event: boolean = false;
         eventsArr.forEach((eventObj) => {
             if (
@@ -178,15 +234,17 @@ function initCalendar(): void {
 
     for (let j: number = 1; j <= nextDays; j++) {
         let nextDate = new Date(year, month + 1, j);
-        let weekDay = ((nextDate.getDay() + 6) % 7) + 1;  // Monday = 1, Sunday = 7
+        let weekDay = ((nextDate.getDay() + 6) % 7) + 1;
         days += `<div class="day next-date" data-day-of-the-week="${weekDay}">${j}</div>`;
     }
 
     if (daysContainer) {
         daysContainer.innerHTML = days;
     }
+    proveriRadnoVreme();
     addListner();
 }
+
 function prevMonth(): void {
     month--;
     if (month < 0) {
@@ -195,6 +253,7 @@ function prevMonth(): void {
     }
     initCalendar();
 }
+
 function nextMonth(): void {
     month++;
     if (month > 11) {
@@ -344,9 +403,30 @@ function updateEvents(date: number): void {
     if (eventsContainer) {
         eventsContainer.innerHTML = events;
     }
-
-    saveEvents();
 }
+
+
+function proveriRadnoVreme(): void {
+    const days = document.querySelectorAll(".day");
+
+    days.forEach(day => {
+        const dayElement = day as HTMLElement; // Cast to HTMLElement
+        const dayOfWeek = parseInt(dayElement.getAttribute("data-day-of-the-week"), 10);
+        const radnoVreme = radnoVremeData.find(data => data.danUNedelji === dayOfWeek);
+
+        if (!radnoVreme) {
+            // Add a class to make the day gray and unclickable
+            dayElement.classList.add("disabled-day");
+            dayElement.style.pointerEvents = "none"; // Makes the day unclickable
+        } else {
+            // Ensure that clickable days are active
+            dayElement.classList.remove("disabled-day");
+            dayElement.style.pointerEvents = "auto"; // Allows the day to be clickable
+        }
+    });
+}
+
+
 
 if (addEventBtn) {
     addEventBtn.addEventListener("click", () => {
@@ -357,10 +437,12 @@ if (addEventBtn) {
         const radnoVreme = radnoVremeData.find(data => data.danUNedelji === dayOfWeek);
 
         if (radnoVreme) {
+            addEventTitle.value = userImePrezime;
             addEventTitle.style.display = "block";
             addEventSubmit.style.display = "block";
             selectPocetak.style.display = "block";
             selectKraj.style.display = "block";
+            stolovi.style.display = "flex";
             document.getElementById("toLabel").style.display = "block";
             document.getElementById("lokalMessage").style.display = "none";
 
@@ -374,6 +456,7 @@ if (addEventBtn) {
             addEventSubmit.style.display = "none";
             selectPocetak.style.display = "none";
             selectKraj.style.display = "none";
+            stolovi.style.display = "none";
             document.getElementById("toLabel").style.display = "none";
             document.getElementById("lokalMessage").style.display = "block";
         }
@@ -404,7 +487,6 @@ function populateSelectOptions(selectElement, start, end) {
         }
     }
 }
-
 
 if (addEventCloseBtn) {
     addEventCloseBtn.addEventListener("click", () => {
@@ -448,7 +530,6 @@ if (addEventTo) {
     });
 }
 
-//modifikuj posle kad dodas stolove
 if (addEventSubmit) {
     addEventSubmit.addEventListener("click", () => {
         const eventTitle: string = addEventTitle ? addEventTitle.value : "";
@@ -545,7 +626,7 @@ if (addEventSubmit) {
         if (activeDayEl && !activeDayEl.classList.contains("event")) {
             activeDayEl.classList.add("event");
         }
-        //posalji rezervaciju controlleru
+
         const reservations = createReservationAndGroupReservationJson(eventsArr);
 
         if (reservations) {
@@ -556,7 +637,6 @@ if (addEventSubmit) {
         }
     });
 }
-
 
 eventsContainer.addEventListener("click", (e: MouseEvent) => {
     if ((e.target as HTMLElement).classList.contains("event")) {
@@ -583,6 +663,7 @@ eventsContainer.addEventListener("click", (e: MouseEvent) => {
                 }
             });
             updateEvents(activeDay);
+            // TODO: Add code to delete the event from the database
         }
     }
 });
@@ -615,8 +696,8 @@ function createReservationAndGroupReservationJson(eventsArr) {
                 pocetak: convertTimeTo24HourFormat(startTime),
                 kraj: convertTimeTo24HourFormat(endTime),
                 datum: formattedDate,
-                stalna_rezervacija: false,  // Default value
-                zavrseno: false  // Default value
+                stalna_rezervacija: false,
+                zavrseno: false
             };
 
             const groupReservationData = event.stolovi?.map(stolovi_id => ({
@@ -630,36 +711,20 @@ function createReservationAndGroupReservationJson(eventsArr) {
 
     return results.length > 0 ? results : console.log("nema rezervacija");
 }
-function convertTimeTo24HourFormat(time: string): string {
-    const [hours, minutes] = time.split(/:| /);
-    const period = time.slice(-2);
-    let hourNumber = parseInt(hours, 10);
-
-    if (period === 'PM' && hourNumber !== 12) {
-        hourNumber += 12;
-    } else if (period === 'AM' && hourNumber === 12) {
-        hourNumber = 0;
-    }
-
-    return `${String(hourNumber).padStart(2, '0')}:${minutes}`;
-}
-
-function saveEvents(): void {
-    localStorage.setItem("events", JSON.stringify(eventsArr));
-}
 
 
+//slanje aktivnih rezervacija serveru
 function sendReservationToServer(reservationData: any) {
     const formattedReservationData = {
         KorisniciID: reservationData.korisnici_id,
         Pocetak: `${reservationData.pocetak}:00`,
-        Kraj: `${reservationData.kraj}:00`, 
+        Kraj: `${reservationData.kraj}:00`,
         Datum: reservationData.datum,
         StalnaRezervacija: reservationData.stalna_rezervacija,
         Zavrseno: reservationData.zavrseno
     };
 
-    fetch('https://localhost:7261/Reservation/add-reservation', {
+    fetch('add-reservation', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -674,11 +739,10 @@ function sendReservationToServer(reservationData: any) {
             if (response.status !== 204 && response.headers.get('content-type')?.includes('application/json')) {
                 return response.json();
             } else {
-                return response.text(); 
+                return response.text();
             }
         });
 }
-
 function sendGroupReservationToServer(groupReservationData: any) {
     fetch('/add-group-reservation', {
         method: 'POST',
@@ -701,21 +765,25 @@ function sendGroupReservationToServer(groupReservationData: any) {
         });
 }
 
-
-
-
-function getEvents(): void {
-    if (localStorage.getItem("events") === null) {
-        return;
-    }
-    eventsArr.push(...JSON.parse(localStorage.getItem("events") as string));
-}
-
+//funkcije za vreme
 function convertTime(time: string): string {
     let timeArr: string[] = time.split(":");
     let timeHour: number = Number(timeArr[0]);
     let timeMin: string = timeArr[1];
     let timeFormat: string = timeHour >= 12 ? "PM" : "AM";
-    timeHour = timeHour % 12 || 12;
+    timeHour = timeHour % 12 || 12;  // Convert "00" to "12" for AM
     return timeHour + ":" + timeMin + " " + timeFormat;
+}
+function convertTimeTo24HourFormat(time: string): string {
+    const [hours, minutes] = time.split(/:| /);
+    const period = time.slice(-2);
+    let hourNumber = parseInt(hours, 10);
+
+    if (period === 'PM' && hourNumber !== 12) {
+        hourNumber += 12;
+    } else if (period === 'AM' && hourNumber === 12) {
+        hourNumber = 0;
+    }
+
+    return `${String(hourNumber).padStart(2, '0')}:${minutes}`;
 }

@@ -637,3 +637,8 @@
         background-color: #ffd800; 
         transform: scale(1.1);
     }
+.disabled-day {
+    background-color: #e0e0e0; /* Light gray color */
+    color: #a0a0a0; /* Text color for disabled days */
+    cursor: not-allowed; /* Change the cursor to indicate it's not clickable */
+}

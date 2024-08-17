@@ -43,8 +43,8 @@ namespace StoniTenis.Controllers
             return View(rezervacija); 
         }
 
-        [HttpGet("get-reservations")]
-        public async Task<List<Lokal>> GetReservationsAsync()
+        [HttpGet("get-lokal")]
+        public async Task<List<Lokal>> GetLokalAsync()
         {
             var lokali = new List<Lokal>();
 
@@ -54,10 +54,23 @@ namespace StoniTenis.Controllers
             }
             return lokali;
         }
+
         [HttpPost("add-reservation")]
         public async Task AddReservationAsync(Rezervacije model)
         {
             await _reservationService.UnesiRezervacije(model.KorisniciID, model.Pocetak, model.Kraj, model.Datum, model.StalnaRezervacija, model.Zavrseno);
+        }
+
+        [HttpGet("get-reservation")]
+        public async Task<List<Rezervacije>> GetReservationAsync()
+        {
+            var rezervacije = new List<Rezervacije>();
+
+            await foreach (Rezervacije rezervacija in _reservationService.PopuniRezervacijeAsync())
+            {
+                rezervacije.Add(rezervacija);
+            }
+            return rezervacije;
         }
 
     }

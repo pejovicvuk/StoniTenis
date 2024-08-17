@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 let allData = [];
 function loadReservationHandler() {
-    fetch('get-reservations')
+    fetch('get-lokal')
         .then(response => response.json())
         .then(data => {
         allData = data;
