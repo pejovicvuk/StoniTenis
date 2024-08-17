@@ -1,6 +1,7 @@
 ﻿using StoniTenis.Models.Entities;
 using System.Data;
 using System.Data.SqlClient;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace StoniTenis.Models.Services
 {
@@ -34,6 +35,25 @@ namespace StoniTenis.Models.Services
                             Grad = reader.GetString(reader.GetOrdinal("grad"))
                         };
                     }
+                }
+            }
+        }
+        public async Task UnesiRezervacije(int korisnikID, TimeSpan pocetak, TimeSpan kraj, DateTime datum, bool stalnaRezervacija, bool zavrseno)
+        {
+            using (SqlConnection conn = _connectionService.GetConnection())
+            {
+                await conn.OpenAsync();
+                using (SqlCommand cmd = new SqlCommand("InsertRezervacija", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Korisnici_id", korisnikID);
+                    cmd.Parameters.AddWithValue("@Pocetak", pocetak);
+                    cmd.Parameters.AddWithValue("@Kraj", kraj);
+                    cmd.Parameters.AddWithValue("@Datum", datum);
+                    cmd.Parameters.AddWithValue("@StalnaRezervacija", stalnaRezervacija);
+                    cmd.Parameters.AddWithValue("@Zavrseno", zavrseno);
+                    await cmd.ExecuteNonQueryAsync();
                 }
             }
         }

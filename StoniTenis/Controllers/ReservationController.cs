@@ -57,7 +57,7 @@ namespace StoniTenis.Controllers
         [HttpPost("add-reservation")]
         public async Task AddReservationAsync(Rezervacije model)
         {
-            
+            await _reservationService.UnesiRezervacije(model.KorisniciID, model.Pocetak, model.Kraj, model.Datum, model.StalnaRezervacija, model.Zavrseno);
         }
 
     }
