@@ -79,7 +79,7 @@ const months = [
 const eventsArr = [];
 //uzimanje rezervacija serveru
 function fetchReservationsFromServer() {
-    fetch('/Reservation/get-reservation', {
+    fetch('/Reservation/get-reservation?korisnikID=${userID}', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

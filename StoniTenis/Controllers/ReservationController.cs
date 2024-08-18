@@ -62,13 +62,16 @@ namespace StoniTenis.Controllers
         }
 
         [HttpGet("get-reservation")]
-        public async Task<List<Rezervacije>> GetReservationAsync()
+        public async Task<List<Rezervacije>> GetReservationAsync(int korisnikID)
         {
             var rezervacije = new List<Rezervacije>();
 
             await foreach (Rezervacije rezervacija in _reservationService.PopuniRezervacijeAsync())
             {
-                rezervacije.Add(rezervacija);
+                if(rezervacija.KorisniciID == korisnikID)
+                {
+                    rezervacije.Add(rezervacija);
+                }
             }
             return rezervacije;
         }
