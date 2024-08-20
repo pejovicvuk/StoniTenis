@@ -38,13 +38,16 @@ namespace StoniTenis.Models.Services
                 }
             }
         }
-        public async IAsyncEnumerable<Rezervacije> PopuniRezervacijeAsync()
+        public async IAsyncEnumerable<Rezervacije> PopuniRezervacijeByIDAsync(int korisnikID)
         {
             using (SqlConnection conn = _connectionService.GetConnection())
             {
                 await conn.OpenAsync();
-                string sql = "SELECT * FROM Rezervacije";
+
+                string sql = "SELECT * FROM Rezervacije WHERE korisnici_id = @KorisnikID";
                 SqlCommand cmd = new SqlCommand(sql, conn);
+
+                cmd.Parameters.AddWithValue("@KorisnikID", korisnikID);
 
                 using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                 {
@@ -64,7 +67,8 @@ namespace StoniTenis.Models.Services
                 }
             }
         }
-        public async Task UnesiRezervacije(int korisnikID, TimeSpan pocetak, TimeSpan kraj, DateTime datum, bool stalnaRezervacija, bool zavrseno)
+
+        public async Task<int> UnesiRezervacije(int korisnikID, TimeSpan pocetak, TimeSpan kraj, DateTime datum, bool stalnaRezervacija, bool zavrseno)
         {
             using (SqlConnection conn = _connectionService.GetConnection())
             {
@@ -73,12 +77,43 @@ namespace StoniTenis.Models.Services
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
+                    // Input parameters
                     cmd.Parameters.AddWithValue("@Korisnici_id", korisnikID);
                     cmd.Parameters.AddWithValue("@Pocetak", pocetak);
                     cmd.Parameters.AddWithValue("@Kraj", kraj);
                     cmd.Parameters.AddWithValue("@Datum", datum);
                     cmd.Parameters.AddWithValue("@StalnaRezervacija", stalnaRezervacija);
                     cmd.Parameters.AddWithValue("@Zavrseno", zavrseno);
+
+                    // Output parameter for the new ID
+                    SqlParameter newIdParam = new SqlParameter("@NewID", SqlDbType.Int);
+                    newIdParam.Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add(newIdParam);
+
+                    // Execute the command
+                    await cmd.ExecuteNonQueryAsync();
+
+                    // Retrieve the newly generated ID
+                    int newId = (int)newIdParam.Value;
+                    return newId;
+                }
+            }
+        }
+
+
+        public async Task UnesiGrupneRezervacije(int rezervacijaID, int brojStola, int lokalID)
+        {
+            using (SqlConnection conn = _connectionService.GetConnection())
+            {
+                await conn.OpenAsync();
+                using (SqlCommand cmd = new SqlCommand("InsertGrupnaRezervacija", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@RezervacijaID", rezervacijaID);
+                    cmd.Parameters.AddWithValue("@BrojStola", brojStola);
+                    cmd.Parameters.AddWithValue("@LokalID", lokalID);
+
                     await cmd.ExecuteNonQueryAsync();
                 }
             }

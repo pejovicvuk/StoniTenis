@@ -56,9 +56,15 @@ namespace StoniTenis.Controllers
         }
 
         [HttpPost("add-reservation")]
-        public async Task AddReservationAsync(Rezervacije model)
+        public async Task<IActionResult> AddReservationAsync(Rezervacije model)
         {
-            await _reservationService.UnesiRezervacije(model.KorisniciID, model.Pocetak, model.Kraj, model.Datum, model.StalnaRezervacija, model.Zavrseno);
+            int newReservationID = await _reservationService.UnesiRezervacije(model.KorisniciID, model.Pocetak, model.Kraj, model.Datum, model.StalnaRezervacija, model.Zavrseno);
+            return Ok(new { RezervacijaID = newReservationID }); //vraca id poslednje rezervacije
+        }
+        [HttpPost("add-groupReservation")]
+        public async Task AddGroupReservationAsync(GrupneRezervacije model)
+        {
+            await _reservationService.UnesiGrupneRezervacije(model.RezervacijaID, model.BrojStola, model.LokalID);
         }
 
         [HttpGet("get-reservation")]
@@ -66,7 +72,7 @@ namespace StoniTenis.Controllers
         {
             var rezervacije = new List<Rezervacije>();
 
-            await foreach (Rezervacije rezervacija in _reservationService.PopuniRezervacijeAsync())
+            await foreach (Rezervacije rezervacija in _reservationService.PopuniRezervacijeByIDAsync(korisnikID))
             {
                 if(rezervacija.KorisniciID == korisnikID)
                 {

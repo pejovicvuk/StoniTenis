@@ -102,7 +102,9 @@ const eventsArr: {
 
 //uzimanje rezervacija serveru
 function fetchReservationsFromServer(): void {
-    fetch('/Reservation/get-reservation?korisnikID=${userID}', {
+    eventsArr.length = 0;
+    const url = `/Reservation/get-reservation?korisnikID=${userID}`;
+    fetch(url, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -630,7 +632,7 @@ if (addEventSubmit) {
 
         if (reservations) {
             reservations.forEach(reservation => {
-                sendReservationToServer(reservation.reservationData);
+                sendReservationToServer(reservation.reservationData, reservation.groupReservationData);
                 //sendGroupReservationToServer(reservation.groupReservationData);
             });
         }
@@ -668,22 +670,11 @@ eventsContainer.addEventListener("click", (e: MouseEvent) => {
 });
 
 function createReservationAndGroupReservationJson(eventsArr) {
-    if (!Array.isArray(eventsArr)) {
-        console.log("Invalid input: eventsArr should be an array");
-        return;
-    }
-
-    if (eventsArr.length === 0) {
-        console.log("nema rezervacija");
-        return;
-    }
-
     const results = [];
 
     eventsArr.forEach(eventItem => {
         eventItem.events.forEach(event => {
             if (!event.time) {
-                console.log("Time is missing for event:", event);
                 return; // Skip this event if it's invalid
             }
 
@@ -700,8 +691,8 @@ function createReservationAndGroupReservationJson(eventsArr) {
             };
 
             const groupReservationData = event.stolovi?.map(stolovi_id => ({
-                stolovi_id: stolovi_id,
-                lokal_id: event.lokalID
+                BrojStola: stolovi_id,
+                LokalID: event.lokalID
             })) || [];
 
             results.push({ reservationData, groupReservationData });
@@ -713,7 +704,7 @@ function createReservationAndGroupReservationJson(eventsArr) {
 
 
 //slanje aktivnih rezervacija serveru
-function sendReservationToServer(reservationData: any) {
+function sendReservationToServer(reservationData: any, groupReservationData: any[]) {
     const formattedReservationData = {
         KorisniciID: reservationData.korisnici_id,
         Pocetak: `${reservationData.pocetak}:00`,
@@ -723,6 +714,8 @@ function sendReservationToServer(reservationData: any) {
         Zavrseno: reservationData.zavrseno
     };
 
+    console.log(formattedReservationData);
+
     fetch('add-reservation', {
         method: 'POST',
         headers: {
@@ -730,39 +723,95 @@ function sendReservationToServer(reservationData: any) {
         },
         body: JSON.stringify(formattedReservationData)
     })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+        .then(response => response.json())
+        .then(data => {
+            const reservationID = data.rezervacijaID;
+            console.log('Reservation ID:', reservationID);
+
+            // Now update the groupReservationData with the reservationID
+            if (groupReservationData && groupReservationData.length > 0) {
+                groupReservationData.forEach(groupReservation => {
+                    groupReservation.RezervacijaID = reservationID;
+                });
+
+                // Send group reservations to the server
+                sendGroupReservationToServer(groupReservationData);
             }
 
-            if (response.status !== 204 && response.headers.get('content-type')?.includes('application/json')) {
-                return response.json();
-            } else {
-                return response.text();
-            }
-        });
-}
-function sendGroupReservationToServer(groupReservationData: any) {
-    fetch('/add-group-reservation', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(groupReservationData)
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Group Reservation success:', data);
+            // After successful reservation, remove it from eventsArr
+            clearReservationData(reservationData);
         })
         .catch((error) => {
-            console.error('Group Reservation error:', error);
+            console.error('Reservation error:', error);
         });
 }
+
+function sendGroupReservationToServer(groupReservationDataArray: any[]) {
+    groupReservationDataArray.forEach(groupReservationData => {
+        const formattedGroupReservationData = {
+            BrojStola: parseInt(groupReservationData.BrojStola, 10),
+            LokalID: groupReservationData.LokalID,
+            RezervacijaID: groupReservationData.RezervacijaID
+        };
+
+        console.log('Sending Group Reservation Data:', formattedGroupReservationData);
+
+        fetch('/Reservation/add-groupReservation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formattedGroupReservationData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                if (response.status === 204) {
+                    console.log('No content returned from server');
+                    return;
+                }
+
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json();
+                } else {
+                    console.log('Non-JSON response received');
+                    return;
+                }
+            })
+            .then(data => {
+                if (data) {
+                    console.log('Group Reservation success:', data);
+                }
+            })
+            .catch((error) => {
+                console.error('Group Reservation error:', error);
+            });
+    });
+}
+
+function clearReservationData(reservationData: any) {
+    eventsArr.forEach((item, dayIndex) => {
+        item.events = item.events.filter(event => {
+            return event.korisnikID !== reservationData.korisnici_id ||
+                event.time !== `${reservationData.pocetak} - ${reservationData.kraj}` ||
+                event.lokalID !== reservationData.lokalID;
+        });
+        if (item.events.length === 0) {
+            eventsArr.splice(dayIndex, 1);
+        }
+    });
+
+    console.log('Cleared reservation from eventsArr', eventsArr);
+}
+
+
+
+
+
+
 
 //funkcije za vreme
 function convertTime(time: string): string {

@@ -1,9 +1,15 @@
 ﻿CREATE PROCEDURE [dbo].[InsertGrupnaRezervacija]
-	@RezervacijaID int,
-	@StoloviID bit
+    @RezervacijaID INT,
+    @BrojStola INT,
+    @LokalID INT
 AS
-begin
-	insert into Grupne_Rezervacije(rezervacija_id, stolovi_id)
-	values (@RezervacijaID, @StoloviID)
-end
+BEGIN
+    DECLARE @StoloviID INT;
 
+    SELECT @StoloviID = id
+    FROM Stolovi
+    WHERE broj_stola = @BrojStola AND lokal_id = @LokalID;
+
+    INSERT INTO Grupne_Rezervacije (rezervacija_id, stolovi_id)
+        VALUES (@RezervacijaID, @StoloviID);
+END
