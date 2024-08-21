@@ -35,7 +35,6 @@ namespace StoniTenis.Middleware
                     int userId = await korisnikService.ReturnIdAsync(email);
                     context.Session.SetInt32("KorisnikID", userId);
                     context.Session.SetInt32("isVlasnik", Convert.ToInt32(await korisnikService.IsVlasnik(userId)));
-                    // Optionally set other session values here
                 }
                 catch (Exception ex)
                 {

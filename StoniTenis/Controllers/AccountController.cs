@@ -38,13 +38,6 @@ namespace StoniTenis.Controllers
             return View("Nalog");
         }
 
-        //public async Task<IActionResult> LoginWithEmail(string email)
-        //{
-        //    int userId = await _korisnikService.ReturnIdAsync(email);
-        //    HttpContext.Session.SetInt32("KorisnikID", userId);
-        //    return View("Nalog");
-        //}
-
         public async Task LoginWithGoogle()
         {
             await HttpContext.ChallengeAsync(GoogleDefaults.AuthenticationScheme, new AuthenticationProperties()
@@ -68,18 +61,17 @@ namespace StoniTenis.Controllers
             var surname = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value;
             var email = userClaims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
-            await UserSessionMiddleware.SetSessionID(HttpContext, _korisnikService);
-
             if (!_korisnikService.KorisnikPostoji(email))
             {
                 await _korisnikService.InsertKorisnikAsync(name, surname, email, false);
             }
-
+            await UserSessionMiddleware.SetSessionID(HttpContext, _korisnikService);
             return RedirectToAction("Nalog");
         }
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync();
+            HttpContext.Session.Clear();
             return RedirectToAction("Login");
         }
     }
