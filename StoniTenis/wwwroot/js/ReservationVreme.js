@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 let radnoVremeData = [];
 export let userImePrezime;
 export let userID;
@@ -53,7 +62,6 @@ function updateTimeOptions(startSelect, endSelect) {
 }
 setupSeatSelection();
 const urlParams = new URLSearchParams(window.location.search);
-const calendar = document.querySelector(".calendar");
 const date = document.querySelector(".date");
 const daysContainer = document.querySelector(".days");
 const prev = document.querySelector(".prev");
@@ -95,23 +103,23 @@ const months = [
 const eventsArr = [];
 //uzimanje rezervacija serveru
 function fetchAndCombineReservations() {
-    const reservationUrl = `/Reservation/get-reservation?korisnikID=${userID}`;
-    const groupReservationUrl = `/Reservation/get-groupReservation?korisnikID=${userID}`;
-    Promise.all([
-        fetch(reservationUrl, {
+    return __awaiter(this, void 0, void 0, function* () {
+        const reservationUrl = `/Reservation/get-reservation?korisnikID=${userID}`;
+        const groupReservationUrl = `/Reservation/get-groupReservation?korisnikID=${userID}`;
+        const reservationResponse = yield fetch(reservationUrl, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
             }
-        }).then(response => response.ok ? response.json() : Promise.reject('Failed to fetch reservations')),
-        fetch(groupReservationUrl, {
+        });
+        const groupReservationResponse = yield fetch(groupReservationUrl, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
             }
-        }).then(response => response.ok ? response.json() : Promise.reject('Failed to fetch group reservations'))
-    ])
-        .then(([reservations, groupReservations]) => {
+        });
+        const reservations = yield reservationResponse.json();
+        const groupReservations = yield groupReservationResponse.json();
         if (Array.isArray(reservations) && reservations.length > 0) {
             mergeReservationsWithGroups(reservations, groupReservations);
             updateCalendarWithReservations();
@@ -201,7 +209,6 @@ function initCalendar() {
         date.innerHTML = months[month] + " " + year;
     }
     let days = "";
-    // Calculate the day of the week for the first day in the grid
     const firstGridDay = new Date(year, month, 1 - day);
     for (let x = 0; x < day; x++) {
         let gridDate = new Date(firstGridDay);
@@ -657,64 +664,56 @@ function createReservationAndGroupReservationJson(eventsArr) {
 }
 //slanje aktivnih rezervacija serveru
 function sendReservationToServer(reservationData, groupReservationData) {
-    const formattedReservationData = {
-        KorisniciID: reservationData.korisnici_id,
-        Pocetak: `${reservationData.pocetak}:00`,
-        Kraj: `${reservationData.kraj}:00`,
-        Datum: reservationData.datum,
-        StalnaRezervacija: reservationData.stalna_rezervacija,
-        Zavrseno: reservationData.zavrseno
-    };
-    fetch('add-reservation', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formattedReservationData)
-    })
-        .then(response => response.json())
-        .then(data => {
+    return __awaiter(this, void 0, void 0, function* () {
+        const formattedReservationData = {
+            KorisniciID: reservationData.korisnici_id,
+            Pocetak: `${reservationData.pocetak}:00`,
+            Kraj: `${reservationData.kraj}:00`,
+            Datum: reservationData.datum,
+            StalnaRezervacija: reservationData.stalna_rezervacija,
+            Zavrseno: reservationData.zavrseno
+        };
+        const response = yield fetch('add-reservation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formattedReservationData)
+        });
+        const data = yield response.json();
         const reservationID = data.rezervacijaID;
         if (groupReservationData && groupReservationData.length > 0) {
             groupReservationData.forEach(groupReservation => {
                 groupReservation.RezervacijaID = reservationID;
             });
-            sendGroupReservationToServer(groupReservationData);
+            yield sendGroupReservationToServer(groupReservationData);
         }
     });
 }
 function sendGroupReservationToServer(groupReservationDataArray) {
-    groupReservationDataArray.forEach(groupReservationData => {
-        const formattedGroupReservationData = {
-            BrojStola: parseInt(groupReservationData.BrojStola, 10),
-            LokalID: groupReservationData.LokalID,
-            RezervacijaID: groupReservationData.RezervacijaID
-        };
-        fetch('/Reservation/add-groupReservation', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formattedGroupReservationData)
-        })
-            .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+    return __awaiter(this, void 0, void 0, function* () {
+        for (const groupReservationData of groupReservationDataArray) {
+            const formattedGroupReservationData = {
+                BrojStola: parseInt(groupReservationData.BrojStola, 10),
+                LokalID: groupReservationData.LokalID,
+                RezervacijaID: groupReservationData.RezervacijaID
+            };
+            const response = yield fetch('/Reservation/add-groupReservation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formattedGroupReservationData)
+            });
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
-                return response.json();
+                const data = yield response.json();
+                console.log('Group Reservation success:', data);
             }
             else {
                 console.log('Non-JSON response received');
-                return;
             }
-        })
-            .then(data => {
-            if (data) {
-                console.log('Group Reservation success:', data);
-            }
-        });
+        }
     });
 }
 //funkcije za vreme

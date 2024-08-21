@@ -63,7 +63,6 @@ function updateTimeOptions(startSelect: HTMLSelectElement | null, endSelect: HTM
 setupSeatSelection();
 
 const urlParams = new URLSearchParams(window.location.search);
-const calendar: HTMLElement | null = document.querySelector(".calendar");
 const date: HTMLElement | null = document.querySelector(".date");
 const daysContainer: HTMLElement | null = document.querySelector(".days");
 const prev: HTMLElement | null = document.querySelector(".prev");
@@ -119,36 +118,35 @@ const eventsArr: {
 }[] = [];
 
 //uzimanje rezervacija serveru
-function fetchAndCombineReservations(): void {
+async function fetchAndCombineReservations(): Promise<void> {
     const reservationUrl = `/Reservation/get-reservation?korisnikID=${userID}`;
     const groupReservationUrl = `/Reservation/get-groupReservation?korisnikID=${userID}`;
 
-    Promise.all([
-        fetch(reservationUrl, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        }).then(response => response.ok ? response.json() : Promise.reject('Failed to fetch reservations')),
+    const reservationResponse = await fetch(reservationUrl, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    });
+    const groupReservationResponse = await fetch(groupReservationUrl, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    });
+    const reservations = await reservationResponse.json();
+    const groupReservations = await groupReservationResponse.json();
 
-        fetch(groupReservationUrl, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        }).then(response => response.ok ? response.json() : Promise.reject('Failed to fetch group reservations'))
-    ])
-        .then(([reservations, groupReservations]) => {
-            if (Array.isArray(reservations) && reservations.length > 0) {
-                mergeReservationsWithGroups(reservations, groupReservations);
-                updateCalendarWithReservations();
-                initCalendar();
-                updateTimeOptions(selectPocetak, selectKraj);
-            } else {
-                console.log("No reservations found");
-            }
-        });
+    if (Array.isArray(reservations) && reservations.length > 0) {
+        mergeReservationsWithGroups(reservations, groupReservations);
+        updateCalendarWithReservations();
+        initCalendar();
+        updateTimeOptions(selectPocetak, selectKraj);
+    } else {
+        console.log("No reservations found");
+    }
 }
+
 function mergeReservationsWithGroups(reservations: any[], groupReservations: any[]): void {
 
     const groupedReservations = groupReservations.reduce((acc, groupReservation) => {
@@ -240,7 +238,6 @@ function initCalendar(): void {
 
     let days: string = "";
 
-    // Calculate the day of the week for the first day in the grid
     const firstGridDay: Date = new Date(year, month, 1 - day);
 
     for (let x: number = 0; x < day; x++) {
@@ -784,7 +781,7 @@ function createReservationAndGroupReservationJson(eventsArr) {
 }
 
 //slanje aktivnih rezervacija serveru
-function sendReservationToServer(reservationData: any, groupReservationData: any[]) {
+async function sendReservationToServer(reservationData: any, groupReservationData: any[]): Promise<void> {
     const formattedReservationData = {
         KorisniciID: reservationData.korisnici_id,
         Pocetak: `${reservationData.pocetak}:00`,
@@ -794,61 +791,51 @@ function sendReservationToServer(reservationData: any, groupReservationData: any
         Zavrseno: reservationData.zavrseno
     };
 
-    fetch('add-reservation', {
+    const response = await fetch('add-reservation', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(formattedReservationData)
-    })
-        .then(response => response.json())
-        .then(data => {
-            const reservationID = data.rezervacijaID;
-            if (groupReservationData && groupReservationData.length > 0) {
-                groupReservationData.forEach(groupReservation => {
-                    groupReservation.RezervacijaID = reservationID;
-                });
-                sendGroupReservationToServer(groupReservationData);
-            }
+    });
+
+    const data = await response.json();
+    const reservationID = data.rezervacijaID;
+
+    if (groupReservationData && groupReservationData.length > 0) {
+        groupReservationData.forEach(groupReservation => {
+            groupReservation.RezervacijaID = reservationID;
         });
+        await sendGroupReservationToServer(groupReservationData);
+    }
 }
 
-function sendGroupReservationToServer(groupReservationDataArray: any[]) {
-    groupReservationDataArray.forEach(groupReservationData => {
+async function sendGroupReservationToServer(groupReservationDataArray: any[]): Promise<void> {
+    for (const groupReservationData of groupReservationDataArray) {
         const formattedGroupReservationData = {
             BrojStola: parseInt(groupReservationData.BrojStola, 10),
             LokalID: groupReservationData.LokalID,
             RezervacijaID: groupReservationData.RezervacijaID
         };
 
-        fetch('/Reservation/add-groupReservation', {
+        const response = await fetch('/Reservation/add-groupReservation', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(formattedGroupReservationData)
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
+        });
 
-
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    return response.json();
-                } else {
-                    console.log('Non-JSON response received');
-                    return;
-                }
-            })
-            .then(data => {
-                if (data) {
-                    console.log('Group Reservation success:', data);
-                }
-            });
-    });
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            console.log('Group Reservation success:', data);
+        } else {
+            console.log('Non-JSON response received');
+        }
+    }
 }
+
 
 
 //funkcije za vreme

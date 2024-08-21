@@ -40,9 +40,9 @@ export function initializePage(radnoVremeData: readonly RadnoVremeData[]) {
             return `${hours}:${minutes}`;
         };
 
-        let initialStart = radnoVreme ? formatTime(radnoVreme.vremeOtvaranja) : '06:00';
+        const initialStart = radnoVreme ? formatTime(radnoVreme.vremeOtvaranja) : '06:00';
         console.log(initialStart);
-        let initialEnd = radnoVreme ? formatTime(radnoVreme.vremeZatvaranja) : '06:00';
+        const initialEnd = radnoVreme ? formatTime(radnoVreme.vremeZatvaranja) : '06:00';
         console.log(initialEnd);
         populateTimeOptions(select, 6, 23, initialStart);
         populateTimeOptions(endTimeSelects[index], 6, 23, initialEnd);

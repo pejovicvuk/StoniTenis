@@ -12,14 +12,15 @@ interface Reservation {
 
 let allData: Reservation[] = [];
 
-function loadReservationHandler(): void {
-    fetch('get-lokal')
-        .then(response => response.json())
-        .then(data => {
-            allData = data as Reservation[];
-            displayItems(allData);
-        })
-        .catch(error => console.error('Error fetching data:', error));
+async function loadReservationHandler(): Promise<void> {
+    const response = await fetch('get-lokal');
+    if (!response.ok) {
+        console.error('Failed to fetch data');
+        return;
+    }
+    const data = await response.json();
+    allData = data as Reservation[];
+    displayItems(allData);
 }
 
 function displayItems(items: Reservation[]): void {
