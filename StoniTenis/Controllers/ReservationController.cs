@@ -81,6 +81,17 @@ namespace StoniTenis.Controllers
             }
             return rezervacije;
         }
+        [HttpGet("get-groupReservation")]
+        public async Task<List<GrupneRezervacije>> GetGroupReservationAsync(int korisnikID)
+        {
+            var grupne = new List<GrupneRezervacije>();
+
+            await foreach (GrupneRezervacije grupna in _reservationService.PopuniGrupneRezervacijeByIDAsync(korisnikID))
+            {
+                grupne.Add(grupna);
+            }
+            return grupne;
+        }
 
     }
 }

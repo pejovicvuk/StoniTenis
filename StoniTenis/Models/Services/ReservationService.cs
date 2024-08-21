@@ -67,6 +67,31 @@ namespace StoniTenis.Models.Services
                 }
             }
         }
+        public async IAsyncEnumerable<GrupneRezervacije> PopuniGrupneRezervacijeByIDAsync(int korisnikID)
+        {
+            using (SqlConnection conn = _connectionService.GetConnection())
+            {
+                await conn.OpenAsync();
+
+                string sql = "select rezervacija_id, broj_stola, lokal_id from grupne_rezervacije join rezervacije on grupne_rezervacije.rezervacija_id = rezervacije.id join stolovi on stolovi.id = grupne_rezervacije.stolovi_id where korisnici_id = @KorisnikID";
+                SqlCommand cmd = new SqlCommand(sql, conn);
+
+                cmd.Parameters.AddWithValue("@KorisnikID", korisnikID);
+
+                using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        yield return new GrupneRezervacije
+                        {
+                            RezervacijaID = reader.GetInt32(reader.GetOrdinal("rezervacija_id")),
+                            BrojStola = reader.GetInt32(reader.GetOrdinal("broj_stola")),
+                            LokalID = reader.GetInt32(reader.GetOrdinal("lokal_id"))
+                        };
+                    }
+                }
+            }
+        }
 
         public async Task<int> UnesiRezervacije(int korisnikID, TimeSpan pocetak, TimeSpan kraj, DateTime datum, bool stalnaRezervacija, bool zavrseno)
         {

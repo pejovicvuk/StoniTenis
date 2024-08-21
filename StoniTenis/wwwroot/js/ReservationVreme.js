@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('User ID:', userID);
     console.log('User Name:', userImePrezime);
     initCalendar();
-    fetchReservationsFromServer();
+    fetchAndCombineReservations();
 });
 const selectedTables = [];
 function setupSeatSelection() {
@@ -32,8 +32,24 @@ function setupSeatSelection() {
                 seatElement.classList.add('selected');
                 selectedTables.push(seatId);
             }
+            updateTimeOptions(selectPocetak, selectKraj);
         });
     });
+}
+function updateTimeOptions(startSelect, endSelect) {
+    if (!startSelect || !endSelect)
+        return;
+    const activeDay = document.querySelector(".day.active");
+    if (!activeDay)
+        return;
+    const dayOfWeek = parseInt(activeDay.getAttribute("data-day-of-the-week"), 10);
+    const radnoVreme = radnoVremeData.find(data => data.danUNedelji === dayOfWeek);
+    if (!radnoVreme)
+        return;
+    const startTime = radnoVreme.vremeOtvaranja.substring(0, 5);
+    const endTime = radnoVreme.vremeZatvaranja.substring(0, 5);
+    populateSelectOptions(startSelect, startTime, endTime);
+    populateSelectOptions(endSelect, startTime, endTime);
 }
 setupSeatSelection();
 const urlParams = new URLSearchParams(window.location.search);
@@ -78,63 +94,92 @@ const months = [
 ];
 const eventsArr = [];
 //uzimanje rezervacija serveru
-function fetchReservationsFromServer() {
-    const url = `/Reservation/get-reservation?korisnikID=${userID}`;
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })
-        .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-        .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-            updateReservationsArray(data);
+function fetchAndCombineReservations() {
+    const reservationUrl = `/Reservation/get-reservation?korisnikID=${userID}`;
+    const groupReservationUrl = `/Reservation/get-groupReservation?korisnikID=${userID}`;
+    Promise.all([
+        fetch(reservationUrl, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }).then(response => response.ok ? response.json() : Promise.reject('Failed to fetch reservations')),
+        fetch(groupReservationUrl, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }).then(response => response.ok ? response.json() : Promise.reject('Failed to fetch group reservations'))
+    ])
+        .then(([reservations, groupReservations]) => {
+        if (Array.isArray(reservations) && reservations.length > 0) {
+            mergeReservationsWithGroups(reservations, groupReservations);
             updateCalendarWithReservations();
             initCalendar();
+            updateTimeOptions(selectPocetak, selectKraj);
         }
         else {
             console.log("No reservations found");
         }
-    })
-        .catch((error) => {
-        console.error('Error fetching reservations:', error);
     });
 }
-function updateReservationsArray(reservations) {
+function mergeReservationsWithGroups(reservations, groupReservations) {
+    const groupedReservations = groupReservations.reduce((acc, groupReservation) => {
+        const { rezervacijaID, brojStola, lokalID } = groupReservation;
+        if (!acc[rezervacijaID]) {
+            acc[rezervacijaID] = {
+                stolovi: [],
+                lokalID: lokalID
+            };
+        }
+        acc[rezervacijaID].stolovi.push(brojStola);
+        return acc;
+    }, {});
     reservations.forEach(reservation => {
-        const date = new Date(reservation.datum);
-        const day = date.getDate();
-        const month = date.getMonth() + 1;
-        const year = date.getFullYear();
-        const event = {
-            title: userImePrezime,
-            time: `${reservation.pocetak} - ${reservation.kraj}`,
-            korisnikID: reservation.korisnici_id,
-            lokalID: reservation.lokal_id,
-            stolovi: reservation.stolovi
-        };
-        let eventAdded = false;
-        eventsArr.forEach(item => {
-            if (item.day === day && item.month === month && item.year === year) {
-                item.events.push(event);
-                eventAdded = true;
-            }
-        });
-        if (!eventAdded) {
-            eventsArr.push({
-                day: day,
-                month: month,
-                year: year,
-                events: [event]
-            });
+        const { id } = reservation;
+        if (groupedReservations[id]) {
+            reservation.stolovi = groupedReservations[id].stolovi || [];
+            reservation.lokalID = groupedReservations[id].lokalID;
+        }
+        else {
+            reservation.stolovi = [];
         }
     });
+    updateReservationsArray(reservations);
+}
+function updateReservationsArray(reservations) {
+    const lokalID = Number(urlParams.get('id'));
+    reservations.forEach(reservation => {
+        if (reservation.lokalID === lokalID) {
+            const date = new Date(reservation.datum);
+            const day = date.getDate();
+            const month = date.getMonth() + 1;
+            const year = date.getFullYear();
+            const event = {
+                title: userImePrezime,
+                time: `${reservation.pocetak} - ${reservation.kraj}`,
+                korisnikID: reservation.korisniciID,
+                lokalID: reservation.lokalID,
+                stolovi: reservation.stolovi
+            };
+            let eventAdded = false;
+            eventsArr.forEach(item => {
+                if (item.day === day && item.month === month && item.year === year) {
+                    item.events.push(event);
+                    eventAdded = true;
+                }
+            });
+            if (!eventAdded) {
+                eventsArr.push({
+                    day: day,
+                    month: month,
+                    year: year,
+                    events: [event]
+                });
+            }
+        }
+    });
+    console.log(eventsArr);
 }
 function updateCalendarWithReservations() {
     if (activeDay) {
@@ -352,18 +397,16 @@ function updateEvents(date) {
 function proveriRadnoVreme() {
     const days = document.querySelectorAll(".day");
     days.forEach(day => {
-        const dayElement = day; // Cast to HTMLElement
+        const dayElement = day;
         const dayOfWeek = parseInt(dayElement.getAttribute("data-day-of-the-week"), 10);
         const radnoVreme = radnoVremeData.find(data => data.danUNedelji === dayOfWeek);
         if (!radnoVreme) {
-            // Add a class to make the day gray and unclickable
             dayElement.classList.add("disabled-day");
-            dayElement.style.pointerEvents = "none"; // Makes the day unclickable
+            dayElement.style.pointerEvents = "none";
         }
         else {
-            // Ensure that clickable days are active
             dayElement.classList.remove("disabled-day");
-            dayElement.style.pointerEvents = "auto"; // Allows the day to be clickable
+            dayElement.style.pointerEvents = "auto";
         }
     });
 }
@@ -399,17 +442,32 @@ if (addEventBtn) {
     });
 }
 function populateSelectOptions(selectElement, start, end) {
+    var _a, _b;
     if (!selectElement)
         return;
     selectElement.innerHTML = '';
     const [startHour, startMinute] = start.split(':').map(Number);
     const [endHour, endMinute] = end.split(':').map(Number);
+    const reservedTimes = eventsArr
+        .filter(eventItem => eventItem.day === activeDay &&
+        eventItem.month === (month + 1) &&
+        eventItem.year === year &&
+        selectedTables.some(table => eventItem.events.some(event => { var _a; return (_a = event.stolovi) === null || _a === void 0 ? void 0 : _a.includes(table); })))
+        .flatMap(eventItem => eventItem.events.filter(event => event.lokalID === Number(urlParams.get('id')) &&
+        selectedTables.some(table => { var _a; return (_a = event.stolovi) === null || _a === void 0 ? void 0 : _a.includes(table); })))
+        .map(event => ({
+        start: convertTimeTo24HourFormat(event.time.split(' - ')[0]),
+        end: convertTimeTo24HourFormat(event.time.split(' - ')[1])
+    }));
     let currentHour = startHour;
     let currentMinute = startMinute;
     while (currentHour < endHour || (currentHour === endHour && currentMinute <= endMinute)) {
-        const timeOption = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
-        const optionElement = new Option(timeOption, timeOption);
-        selectElement.options.add(optionElement);
+        const currentTime = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
+        const isReserved = reservedTimes.some(reservedTime => (currentTime > reservedTime.start && currentTime < reservedTime.end));
+        if (!isReserved || currentTime === ((_a = reservedTimes.find(reservedTime => reservedTime.start === currentTime)) === null || _a === void 0 ? void 0 : _a.start) || currentTime === ((_b = reservedTimes.find(reservedTime => reservedTime.end === currentTime)) === null || _b === void 0 ? void 0 : _b.end)) {
+            const optionElement = new Option(currentTime, currentTime);
+            selectElement.options.add(optionElement);
+        }
         currentMinute += 15;
         if (currentMinute >= 60) {
             currentMinute = 0;
@@ -538,6 +596,7 @@ if (addEventSubmit) {
                 //sendGroupReservationToServer(reservation.groupReservationData);
             });
         }
+        console.log(eventsArr);
     });
 }
 eventsContainer.addEventListener("click", (e) => {
@@ -616,16 +675,12 @@ function sendReservationToServer(reservationData, groupReservationData) {
         .then(response => response.json())
         .then(data => {
         const reservationID = data.rezervacijaID;
-        console.log('Reservation ID:', reservationID);
         if (groupReservationData && groupReservationData.length > 0) {
             groupReservationData.forEach(groupReservation => {
                 groupReservation.RezervacijaID = reservationID;
             });
             sendGroupReservationToServer(groupReservationData);
         }
-    })
-        .catch((error) => {
-        console.error('Reservation error:', error);
     });
 }
 function sendGroupReservationToServer(groupReservationDataArray) {
@@ -646,10 +701,6 @@ function sendGroupReservationToServer(groupReservationDataArray) {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            if (response.status === 204) {
-                console.log('No content returned from server');
-                return;
-            }
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
                 return response.json();
@@ -663,9 +714,6 @@ function sendGroupReservationToServer(groupReservationDataArray) {
             if (data) {
                 console.log('Group Reservation success:', data);
             }
-        })
-            .catch((error) => {
-            console.error('Group Reservation error:', error);
         });
     });
 }
