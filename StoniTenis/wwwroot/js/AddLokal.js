@@ -1,19 +1,13 @@
 const modal = document.getElementById("lokalModal");
 const btn = document.getElementById("addLokalBtn");
 const span = document.getElementsByClassName("close")[0];
-btn.onclick = function () {
-    modal.style.display = "block";
-};
-span.onclick = function () {
-    modal.style.display = "none";
-};
+btn.onclick = () => modal.style.display = "block";
+span.onclick = () => modal.style.display = "block";
 window.onclick = function (event) {
     if (event.target === modal) {
         modal.style.display = "none";
     }
 };
 const form = document.getElementById("lokalForm");
-form.onsubmit = function (event) {
-    modal.style.display = "none";
-};
+form.onsubmit = () => modal.style.display = "none";
 //# sourceMappingURL=AddLokal.js.map
