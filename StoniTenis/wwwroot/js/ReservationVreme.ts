@@ -102,7 +102,6 @@ const eventsArr: {
 
 //uzimanje rezervacija serveru
 function fetchReservationsFromServer(): void {
-    eventsArr.length = 0;
     const url = `/Reservation/get-reservation?korisnikID=${userID}`;
     fetch(url, {
         method: 'GET',
@@ -131,7 +130,6 @@ function fetchReservationsFromServer(): void {
 }
 
 function updateReservationsArray(reservations: any[]): void {
-    eventsArr.length = 0; // Clear existing events
 
     reservations.forEach(reservation => {
         const date = new Date(reservation.datum);
@@ -630,6 +628,8 @@ if (addEventSubmit) {
 
         const reservations = createReservationAndGroupReservationJson(eventsArr);
 
+
+
         if (reservations) {
             reservations.forEach(reservation => {
                 sendReservationToServer(reservation.reservationData, reservation.groupReservationData);
@@ -664,7 +664,6 @@ eventsContainer.addEventListener("click", (e: MouseEvent) => {
                 }
             });
             updateEvents(activeDay);
-            // TODO: Add code to delete the event from the database
         }
     }
 });
@@ -672,35 +671,41 @@ eventsContainer.addEventListener("click", (e: MouseEvent) => {
 function createReservationAndGroupReservationJson(eventsArr) {
     const results = [];
 
-    eventsArr.forEach(eventItem => {
-        eventItem.events.forEach(event => {
-            if (!event.time) {
-                return; // Skip this event if it's invalid
-            }
+    if (eventsArr.length === 0) {
+        console.log("nema rezervacija");
+        return results; 
+    }
 
-            const [startTime, endTime] = event.time.split(' - ');
-            const formattedDate = `${eventItem.year}-${String(eventItem.month).padStart(2, '0')}-${String(eventItem.day).padStart(2, '0')}`;
+    const eventItem = eventsArr[eventsArr.length - 1];
 
-            const reservationData = {
-                korisnici_id: event.korisnikID,
-                pocetak: convertTimeTo24HourFormat(startTime),
-                kraj: convertTimeTo24HourFormat(endTime),
-                datum: formattedDate,
-                stalna_rezervacija: false,
-                zavrseno: false
-            };
+    eventItem.events.forEach(event => {
+        if (!event.time) {
+            return; 
+        }
 
-            const groupReservationData = event.stolovi?.map(stolovi_id => ({
-                BrojStola: stolovi_id,
-                LokalID: event.lokalID
-            })) || [];
+        const [startTime, endTime] = event.time.split(' - ');
+        const formattedDate = `${eventItem.year}-${String(eventItem.month).padStart(2, '0')}-${String(eventItem.day).padStart(2, '0')}`;
 
-            results.push({ reservationData, groupReservationData });
-        });
+        const reservationData = {
+            korisnici_id: event.korisnikID,
+            pocetak: convertTimeTo24HourFormat(startTime),
+            kraj: convertTimeTo24HourFormat(endTime),
+            datum: formattedDate,
+            stalna_rezervacija: false,
+            zavrseno: false
+        };
+
+        const groupReservationData = event.stolovi?.map(stolovi_id => ({
+            BrojStola: stolovi_id,
+            LokalID: event.lokalID
+        })) || [];
+
+        results.push({ reservationData, groupReservationData });
     });
 
     return results.length > 0 ? results : console.log("nema rezervacija");
 }
+
 
 
 //slanje aktivnih rezervacija serveru
@@ -714,8 +719,6 @@ function sendReservationToServer(reservationData: any, groupReservationData: any
         Zavrseno: reservationData.zavrseno
     };
 
-    console.log(formattedReservationData);
-
     fetch('add-reservation', {
         method: 'POST',
         headers: {
@@ -728,18 +731,12 @@ function sendReservationToServer(reservationData: any, groupReservationData: any
             const reservationID = data.rezervacijaID;
             console.log('Reservation ID:', reservationID);
 
-            // Now update the groupReservationData with the reservationID
             if (groupReservationData && groupReservationData.length > 0) {
                 groupReservationData.forEach(groupReservation => {
                     groupReservation.RezervacijaID = reservationID;
                 });
-
-                // Send group reservations to the server
                 sendGroupReservationToServer(groupReservationData);
             }
-
-            // After successful reservation, remove it from eventsArr
-            clearReservationData(reservationData);
         })
         .catch((error) => {
             console.error('Reservation error:', error);
@@ -753,8 +750,6 @@ function sendGroupReservationToServer(groupReservationDataArray: any[]) {
             LokalID: groupReservationData.LokalID,
             RezervacijaID: groupReservationData.RezervacijaID
         };
-
-        console.log('Sending Group Reservation Data:', formattedGroupReservationData);
 
         fetch('/Reservation/add-groupReservation', {
             method: 'POST',
@@ -791,27 +786,6 @@ function sendGroupReservationToServer(groupReservationDataArray: any[]) {
             });
     });
 }
-
-function clearReservationData(reservationData: any) {
-    eventsArr.forEach((item, dayIndex) => {
-        item.events = item.events.filter(event => {
-            return event.korisnikID !== reservationData.korisnici_id ||
-                event.time !== `${reservationData.pocetak} - ${reservationData.kraj}` ||
-                event.lokalID !== reservationData.lokalID;
-        });
-        if (item.events.length === 0) {
-            eventsArr.splice(dayIndex, 1);
-        }
-    });
-
-    console.log('Cleared reservation from eventsArr', eventsArr);
-}
-
-
-
-
-
-
 
 //funkcije za vreme
 function convertTime(time: string): string {
