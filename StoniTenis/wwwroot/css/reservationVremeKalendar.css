@@ -1,62 +1,53 @@
 ﻿:root {
     --primary-clr: #1560BD;
+    --font-family: 'Arial', sans-serif; /* Changed to a simpler, more common font */
 }
+
+body {
+    font-family: var(--font-family);
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0; /* Light background for overall page */
+}
+
 .containerCalendar {
     position: relative;
-    width: 1200px;
+    width: 400px; /* Adjusted width */
     min-height: 850px;
-    margin: 0 auto;
+    margin: 20px 0 20px 20px; /* Left aligned with margin from top */
     padding: 5px;
     color: #fff;
     display: flex;
+    flex-direction: column; /* Stack items vertically */
+    align-items: flex-start; /* Align to the left */
     border-radius: 10px;
     background-color: #373c4f;
 }
 
 .left {
-    width: 60%;
+    width: 100%; /* Adjusted to take full width */
     padding: 20px;
 }
 
 .calendar {
     position: relative;
     width: 100%;
-    height: 100%;
     display: flex;
     flex-direction: column;
-    flex-wrap: wrap;
     justify-content: space-between;
     color: #878895;
     border-radius: 5px;
     background-color: #fff;
+    margin-bottom: 20px; /* Space between calendar and events */
 }
-    /* set after behind the main element */
-    .calendar::before,
-    .calendar::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 100%;
-        width: 12px;
-        height: 97%;
-        border-radius: 0 5px 5px 0;
-        background-color: #d3d4d6d7;
-        transform: translateY(-50%);
-    }
-
-    .calendar::before {
-        height: 94%;
-        left: calc(100% + 12px);
-        background-color: rgb(153, 153, 153);
-    }
 
     .calendar .month {
         width: 100%;
-        height: 150px;
+        height: 50px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0 50px;
+        padding: 0 20px;
         font-size: 1.2rem;
         font-weight: 500;
         text-transform: capitalize;
@@ -74,7 +65,7 @@
 
     .calendar .weekdays {
         width: 100%;
-        height: 100px;
+        height: 50px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -86,7 +77,6 @@
 
 .weekdays div {
     width: 14.28%;
-    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -105,13 +95,13 @@
 
     .calendar .days .day {
         width: 14.28%;
-        height: 90px;
+        height: 40px; /* Adjusted for a smaller size */
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         color: var(--primary-clr);
-        border: 1px solid #f5f5f5;
+        font-size: 16px;
     }
 
         .calendar .days .day:nth-child(7n + 1) {
@@ -131,8 +121,9 @@
         }
 
         .calendar .days .day:not(.prev-date, .next-date):hover {
-            color: #fff;
-            background-color: var(--primary-clr);
+            color: var(--primary-clr);
+            border: solid 2px #8c92ac;
+            border-radius: 7px;
         }
 
     .calendar .days .prev-date,
@@ -142,9 +133,8 @@
 
     .calendar .days .active {
         position: relative;
-        font-size: 2rem;
-        color: #fff;
-        background-color: var(--primary-clr);
+        font-size: 1.2rem;
+        color: var(--primary-clr);
     }
 
         .calendar .days .active::before {
@@ -154,11 +144,12 @@
             left: 0;
             width: 100%;
             height: 100%;
-            box-shadow: 0 0 10px 2px var(--primary-clr);
+            border: solid 2px;
+            border-radius: 7px;
         }
 
     .calendar .days .today {
-        font-size: 2rem;
+        font-size: 1.2rem;
     }
 
     .calendar .days .event {
@@ -192,7 +183,6 @@
 
 .calendar .goto-today {
     width: 100%;
-    height: 50px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -218,7 +208,6 @@
             border-radius: 5px;
             padding: 0 20px;
             color: var(--primary-clr);
-            border-radius: 5px;
         }
 
     .calendar .goto-today button {
@@ -241,44 +230,9 @@
         border-radius: 0;
     }
 
-.container .right {
-    position: relative;
-    width: 40%;
-    min-height: 100%;
-    padding: 20px 0;
-}
-
-.right .today-date {
-    width: 100%;
-    height: 50px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 40px;
-    padding-left: 70px;
-    margin-top: 50px;
-    margin-bottom: 20px;
-    text-transform: capitalize;
-}
-
-    .right .today-date .event-day {
-        font-size: 2rem;
-        font-weight: 500;
-    }
-
-    .right .today-date .event-date {
-        font-size: 1rem;
-        font-weight: 400;
-        color: #878895;
-    }
-
 .events {
     width: 100%;
-    height: 100%;
-    max-height: 600px;
-    overflow-x: hidden;
+    height: auto;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -287,7 +241,7 @@
 
     .events .event {
         position: relative;
-        width: 95%;
+        width: 100%;
         min-height: 70px;
         display: flex;
         justify-content: center;
@@ -299,7 +253,7 @@
         background: linear-gradient(90deg, #3f4458, transparent);
         cursor: pointer;
     }
-        /* even event */
+
         .events .event:nth-child(even) {
             background: transparent;
         }
@@ -340,24 +294,48 @@
         .events .event:hover .event-time {
             color: #fff;
         }
-        /* add tick in event after */
-        .events .event::after {
-            content: "✓";
-            position: absolute;
-            top: 50%;
-            right: 0;
-            font-size: 3rem;
-            line-height: 1;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            opacity: 0.3;
-            color: var(--primary-clr);
-            transform: translateY(-50%);
+
+    .events .no-event {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 500;
+        color: #878895;
+    }
+
+.all-reservations {
+    width: 100%;
+    height: auto;
+    max-height: 300px; /* Adjusted height for scrolling */
+    overflow-y: auto;
+    margin-top: 20px;
+    background-color: #2c2f3a;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+    .all-reservations .reservation {
+        padding: 10px;
+        border-bottom: 1px solid #444;
+        cursor: pointer;
+    }
+
+        .all-reservations .reservation:hover {
+            background-color: #3a3d4b;
         }
 
-        .events .event:hover::after {
-            display: flex;
+        .all-reservations .reservation .reservation-date {
+            font-size: 0.9rem;
+            color: #b3b3b3;
+        }
+
+        .all-reservations .reservation .reservation-details {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #fff;
         }
 
 .add-event {
@@ -385,17 +363,6 @@
     .add-event i {
         pointer-events: none;
     }
-
-.events .no-event {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    font-weight: 500;
-    color: #878895;
-}
 
 .add-event-wrapper {
     position: absolute;
@@ -443,7 +410,6 @@
 
 .add-event-body {
     width: 100%;
-    height: 100%;
     display: flex;
     flex-direction: column;
     gap: 20px; /* Add more gap to space out elements */
@@ -481,6 +447,7 @@
                 .add-event-body .add-event-input input:focus::placeholder {
                     color: var(--primary-clr);
                 }
+
     .add-event-body .add-event-select {
         width: 100%;
         height: 40px;
@@ -489,17 +456,18 @@
         justify-content: space-between;
         gap: 10px;
     }
-    .add-event-body .add-event-select select {
-        width: 100%;
-        height: 100%;
-        outline: none;
-        border: none;
-        border-bottom: 1px solid #f5f5f5;
-        padding: 0 10px;
-        font-size: 1rem;
-        font-weight: 400;
-        color: #373c4f;
-    }
+
+        .add-event-body .add-event-select select {
+            width: 100%;
+            height: 100%;
+            outline: none;
+            border: none;
+            border-bottom: 1px solid #f5f5f5;
+            padding: 0 10px;
+            font-size: 1rem;
+            font-weight: 400;
+            color: #373c4f;
+        }
 
 .add-event-footer {
     display: flex;
@@ -600,45 +568,29 @@
         padding: 20px;
     }
 }
-/*stolovi*/
-.containerStolovi {
-    display: flex;
-    flex-wrap: wrap;
-    border: 2px solid #ccc;
-    border-radius: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    margin: auto;
-    height: auto;
-    width: 300px;
-    justify-content: center;
-    background-color: #f5f5f5;
+
+/* Additional Styles for Proper Layout */
+.containerCalendar {
+    flex-direction: column;
+    align-items: flex-start;
 }
 
-.seat {
-    background-color: #f8ab69;
-    height: 30px;
-    width: 54px;
-    margin: 10px;
-    padding: 5px;
-    border-radius: 5px;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+.calendar {
+    margin-bottom: 20px;
 }
 
-    .seat:hover {
-        background-color: #ffd800;
-        transform: scale(1.1);
+.events {
+    margin-top: 0;
+}
+
+@media screen and (max-width: 1200px) {
+    .containerCalendar {
+        width: 100%;
     }
-    .seat.selected {
-        background-color: #ffd800; 
-        transform: scale(1.1);
-    }
+}
+
 .disabled-day {
-    background-color: #e0e0e0; /* Light gray color */
-    color: #a0a0a0; /* Text color for disabled days */
-    cursor: not-allowed; /* Change the cursor to indicate it's not clickable */
+    background-color: #e0e0e0;
+    color: #a0a0a0; 
+    cursor: not-allowed; 
 }

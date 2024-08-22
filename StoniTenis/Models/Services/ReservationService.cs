@@ -102,7 +102,6 @@ namespace StoniTenis.Models.Services
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    // Input parameters
                     cmd.Parameters.AddWithValue("@Korisnici_id", korisnikID);
                     cmd.Parameters.AddWithValue("@Pocetak", pocetak);
                     cmd.Parameters.AddWithValue("@Kraj", kraj);
@@ -110,15 +109,12 @@ namespace StoniTenis.Models.Services
                     cmd.Parameters.AddWithValue("@StalnaRezervacija", stalnaRezervacija);
                     cmd.Parameters.AddWithValue("@Zavrseno", zavrseno);
 
-                    // Output parameter for the new ID
                     SqlParameter newIdParam = new SqlParameter("@NewID", SqlDbType.Int);
                     newIdParam.Direction = ParameterDirection.Output;
                     cmd.Parameters.Add(newIdParam);
 
-                    // Execute the command
                     await cmd.ExecuteNonQueryAsync();
 
-                    // Retrieve the newly generated ID
                     int newId = (int)newIdParam.Value;
                     return newId;
                 }

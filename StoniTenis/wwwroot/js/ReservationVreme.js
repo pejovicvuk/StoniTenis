@@ -82,6 +82,7 @@ const addEventSubmit = document.querySelector(".add-event-btn");
 const selectPocetak = document.querySelector(".start-time");
 const selectKraj = document.querySelector(".end-time");
 const stolovi = document.querySelector(".containerStolovi");
+const allReservationsContainer = document.querySelector(".all-reservations");
 let today = new Date();
 let activeDay;
 let month = today.getMonth();
@@ -101,7 +102,7 @@ const months = [
     "December",
 ];
 const eventsArr = [];
-//uzimanje rezervacija serveru
+// Fetching reservations and group reservations from the server
 function fetchAndCombineReservations() {
     return __awaiter(this, void 0, void 0, function* () {
         const reservationUrl = `/Reservation/get-reservation?korisnikID=${userID}`;
@@ -123,8 +124,7 @@ function fetchAndCombineReservations() {
         if (Array.isArray(reservations) && reservations.length > 0) {
             mergeReservationsWithGroups(reservations, groupReservations);
             updateCalendarWithReservations();
-            initCalendar();
-            updateTimeOptions(selectPocetak, selectKraj);
+            displayAllReservations(); // Display all reservations below the calendar
         }
         else {
             console.log("No reservations found");
@@ -401,6 +401,52 @@ function updateEvents(date) {
         eventsContainer.innerHTML = events;
     }
 }
+function displayAllReservations() {
+    let allReservationsHTML = "";
+    eventsArr.forEach((eventObj) => {
+        eventObj.events.forEach((event) => {
+            const stolovi = event.stolovi ? `Stolovi: ${event.stolovi.join(', ')}` : '';
+            const reservationDate = `${eventObj.day} ${months[eventObj.month - 1]} ${eventObj.year}`;
+            allReservationsHTML += `
+            <div class="reservation" data-day="${eventObj.day}" data-month="${eventObj.month}" data-year="${eventObj.year}">
+                <div class="reservation-date">${reservationDate}</div>
+                <div class="reservation-details">${event.title} - ${event.time} ${stolovi}</div>
+            </div>`;
+        });
+    });
+    if (allReservationsHTML === "") {
+        allReservationsHTML = `<div class="no-reservation"><h3>No Reservations</h3></div>`;
+    }
+    if (allReservationsContainer) {
+        allReservationsContainer.innerHTML = allReservationsHTML;
+        // Add click event listener to each reservation to navigate to the respective date
+        const reservations = allReservationsContainer.querySelectorAll('.reservation');
+        reservations.forEach((reservation) => {
+            reservation.addEventListener('click', (e) => {
+                const target = e.currentTarget;
+                const day = Number(target.getAttribute('data-day'));
+                const month = Number(target.getAttribute('data-month')) - 1; // month is 0-indexed
+                const year = Number(target.getAttribute('data-year'));
+                activeDay = day;
+                setYearAndMonth(year, month);
+                initCalendar();
+                updateEvents(day);
+                document.querySelectorAll('.day').forEach((dayElem) => {
+                    if (Number(dayElem.innerHTML) === day && !dayElem.classList.contains('prev-date') && !dayElem.classList.contains('next-date')) {
+                        dayElem.classList.add('active');
+                    }
+                    else {
+                        dayElem.classList.remove('active');
+                    }
+                });
+            });
+        });
+    }
+}
+function setYearAndMonth(yearVal, monthVal) {
+    year = yearVal;
+    month = monthVal;
+}
 function proveriRadnoVreme() {
     const days = document.querySelectorAll(".day");
     days.forEach(day => {
@@ -487,11 +533,11 @@ if (addEventCloseBtn) {
         addEventWrapper.classList.remove("active");
     });
 }
-document.addEventListener("click", (e) => {
-    if (e.target !== addEventBtn && addEventWrapper && !addEventWrapper.contains(e.target)) {
-        addEventWrapper.classList.remove("active");
-    }
-});
+//document.addEventListener("click", (e: MouseEvent) => {
+//    if (e.target !== addEventBtn && addEventWrapper && !addEventWrapper.contains(e.target as Node)) {
+//        addEventWrapper.classList.remove("active");
+//    });
+//});
 if (addEventTitle) {
     addEventTitle.addEventListener("input", (e) => {
         addEventTitle.value = addEventTitle.value.slice(0, 60);
@@ -600,38 +646,11 @@ if (addEventSubmit) {
         if (reservations) {
             reservations.forEach(reservation => {
                 sendReservationToServer(reservation.reservationData, reservation.groupReservationData);
-                //sendGroupReservationToServer(reservation.groupReservationData);
             });
         }
         console.log(eventsArr);
     });
 }
-eventsContainer.addEventListener("click", (e) => {
-    if (e.target.classList.contains("event")) {
-        if (confirm("Are you sure you want to delete this event?")) {
-            const eventTitle = e.target.children[0].children[1].innerHTML;
-            eventsArr.forEach((event) => {
-                if (event.day === activeDay &&
-                    event.month === month + 1 &&
-                    event.year === year) {
-                    event.events.forEach((item, index) => {
-                        if (item.title === eventTitle) {
-                            event.events.splice(index, 1);
-                        }
-                    });
-                    if (event.events.length === 0) {
-                        eventsArr.splice(eventsArr.indexOf(event), 1);
-                        const activeDayEl = document.querySelector(".day.active");
-                        if (activeDayEl && activeDayEl.classList.contains("event")) {
-                            activeDayEl.classList.remove("event");
-                        }
-                    }
-                }
-            });
-            updateEvents(activeDay);
-        }
-    }
-});
 function createReservationAndGroupReservationJson(eventsArr) {
     const results = [];
     if (eventsArr.length === 0) {
@@ -662,7 +681,6 @@ function createReservationAndGroupReservationJson(eventsArr) {
     });
     return results.length > 0 ? results : console.log("nema rezervacija");
 }
-//slanje aktivnih rezervacija serveru
 function sendReservationToServer(reservationData, groupReservationData) {
     return __awaiter(this, void 0, void 0, function* () {
         const formattedReservationData = {
@@ -716,7 +734,6 @@ function sendGroupReservationToServer(groupReservationDataArray) {
         }
     });
 }
-//funkcije za vreme
 function convertTime(time) {
     let timeArr = time.split(":");
     let timeHour = Number(timeArr[0]);

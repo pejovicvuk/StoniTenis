@@ -44,6 +44,7 @@ function setupSeatSelection(): void {
         });
     });
 }
+
 function updateTimeOptions(startSelect: HTMLSelectElement | null, endSelect: HTMLSelectElement | null): void {
     if (!startSelect || !endSelect) return;
 
@@ -83,6 +84,7 @@ const addEventSubmit: HTMLElement | null = document.querySelector(".add-event-bt
 const selectPocetak: HTMLSelectElement | null = document.querySelector(".start-time");
 const selectKraj: HTMLSelectElement | null = document.querySelector(".end-time");
 const stolovi: HTMLElement | null = document.querySelector(".containerStolovi");
+const allReservationsContainer: HTMLElement | null = document.querySelector(".all-reservations");
 
 let today: Date = new Date();
 let activeDay: number | undefined;
@@ -117,7 +119,7 @@ const eventsArr: {
     }[];
 }[] = [];
 
-//uzimanje rezervacija serveru
+// Fetching reservations and group reservations from the server
 async function fetchAndCombineReservations(): Promise<void> {
     const reservationUrl = `/Reservation/get-reservation?korisnikID=${userID}`;
     const groupReservationUrl = `/Reservation/get-groupReservation?korisnikID=${userID}`;
@@ -140,15 +142,13 @@ async function fetchAndCombineReservations(): Promise<void> {
     if (Array.isArray(reservations) && reservations.length > 0) {
         mergeReservationsWithGroups(reservations, groupReservations);
         updateCalendarWithReservations();
-        initCalendar();
-        updateTimeOptions(selectPocetak, selectKraj);
+        displayAllReservations(); // Display all reservations below the calendar
     } else {
         console.log("No reservations found");
     }
 }
 
 function mergeReservationsWithGroups(reservations: any[], groupReservations: any[]): void {
-
     const groupedReservations = groupReservations.reduce((acc, groupReservation) => {
         const { rezervacijaID, brojStola, lokalID } = groupReservation;
         if (!acc[rezervacijaID]) {
@@ -213,7 +213,6 @@ function updateReservationsArray(reservations: any[]): void {
     });
     console.log(eventsArr);
 }
-
 
 function updateCalendarWithReservations(): void {
     if (activeDay) {
@@ -453,6 +452,58 @@ function updateEvents(date: number): void {
     }
 }
 
+function displayAllReservations(): void {
+    let allReservationsHTML = "";
+
+    eventsArr.forEach((eventObj) => {
+        eventObj.events.forEach((event) => {
+            const stolovi = event.stolovi ? `Stolovi: ${event.stolovi.join(', ')}` : '';
+            const reservationDate = `${eventObj.day} ${months[eventObj.month - 1]} ${eventObj.year}`;
+
+            allReservationsHTML += `
+            <div class="reservation" data-day="${eventObj.day}" data-month="${eventObj.month}" data-year="${eventObj.year}">
+                <div class="reservation-date">${reservationDate}</div>
+                <div class="reservation-details">${event.title} - ${event.time} ${stolovi}</div>
+            </div>`;
+        });
+    });
+
+    if (allReservationsHTML === "") {
+        allReservationsHTML = `<div class="no-reservation"><h3>No Reservations</h3></div>`;
+    }
+
+    if (allReservationsContainer) {
+        allReservationsContainer.innerHTML = allReservationsHTML;
+
+        // Add click event listener to each reservation to navigate to the respective date
+        const reservations = allReservationsContainer.querySelectorAll('.reservation');
+        reservations.forEach((reservation) => {
+            reservation.addEventListener('click', (e) => {
+                const target = e.currentTarget as HTMLElement;
+                const day = Number(target.getAttribute('data-day'));
+                const month = Number(target.getAttribute('data-month')) - 1; // month is 0-indexed
+                const year = Number(target.getAttribute('data-year'));
+
+                activeDay = day;
+                setYearAndMonth(year, month);
+                initCalendar();
+                updateEvents(day);
+                document.querySelectorAll('.day').forEach((dayElem) => {
+                    if (Number(dayElem.innerHTML) === day && !dayElem.classList.contains('prev-date') && !dayElem.classList.contains('next-date')) {
+                        dayElem.classList.add('active');
+                    } else {
+                        dayElem.classList.remove('active');
+                    }
+                });
+            });
+        });
+    }
+}
+
+function setYearAndMonth(yearVal: number, monthVal: number): void {
+    year = yearVal;
+    month = monthVal;
+}
 
 function proveriRadnoVreme(): void {
     const days = document.querySelectorAll(".day");
@@ -471,8 +522,6 @@ function proveriRadnoVreme(): void {
         }
     });
 }
-
-
 
 if (addEventBtn) {
     addEventBtn.addEventListener("click", () => {
@@ -557,20 +606,17 @@ function populateSelectOptions(selectElement: HTMLSelectElement, start: string, 
     }
 }
 
-
-
-
 if (addEventCloseBtn) {
     addEventCloseBtn.addEventListener("click", () => {
         addEventWrapper.classList.remove("active");
     });
 }
 
-document.addEventListener("click", (e: MouseEvent) => {
-    if (e.target !== addEventBtn && addEventWrapper && !addEventWrapper.contains(e.target as Node)) {
-        addEventWrapper.classList.remove("active");
-    }
-});
+//document.addEventListener("click", (e: MouseEvent) => {
+//    if (e.target !== addEventBtn && addEventWrapper && !addEventWrapper.contains(e.target as Node)) {
+//        addEventWrapper.classList.remove("active");
+//    });
+//});
 
 if (addEventTitle) {
     addEventTitle.addEventListener("input", (e: InputEvent) => {
@@ -701,46 +747,14 @@ if (addEventSubmit) {
 
         const reservations = createReservationAndGroupReservationJson(eventsArr);
 
-
-
         if (reservations) {
             reservations.forEach(reservation => {
                 sendReservationToServer(reservation.reservationData, reservation.groupReservationData);
-                //sendGroupReservationToServer(reservation.groupReservationData);
             });
         }
         console.log(eventsArr);
     });
 }
-
-eventsContainer.addEventListener("click", (e: MouseEvent) => {
-    if ((e.target as HTMLElement).classList.contains("event")) {
-        if (confirm("Are you sure you want to delete this event?")) {
-            const eventTitle: string = (e.target as HTMLElement).children[0].children[1].innerHTML;
-            eventsArr.forEach((event) => {
-                if (
-                    event.day === activeDay &&
-                    event.month === month + 1 &&
-                    event.year === year
-                ) {
-                    event.events.forEach((item, index) => {
-                        if (item.title === eventTitle) {
-                            event.events.splice(index, 1);
-                        }
-                    });
-                    if (event.events.length === 0) {
-                        eventsArr.splice(eventsArr.indexOf(event), 1);
-                        const activeDayEl: HTMLElement | null = document.querySelector(".day.active");
-                        if (activeDayEl && activeDayEl.classList.contains("event")) {
-                            activeDayEl.classList.remove("event");
-                        }
-                    }
-                }
-            });
-            updateEvents(activeDay);
-        }
-    }
-});
 
 function createReservationAndGroupReservationJson(eventsArr) {
     const results = [];
@@ -780,7 +794,6 @@ function createReservationAndGroupReservationJson(eventsArr) {
     return results.length > 0 ? results : console.log("nema rezervacija");
 }
 
-//slanje aktivnih rezervacija serveru
 async function sendReservationToServer(reservationData: any, groupReservationData: any[]): Promise<void> {
     const formattedReservationData = {
         KorisniciID: reservationData.korisnici_id,
@@ -836,9 +849,6 @@ async function sendGroupReservationToServer(groupReservationDataArray: any[]): P
     }
 }
 
-
-
-//funkcije za vreme
 function convertTime(time: string): string {
     let timeArr: string[] = time.split(":");
     let timeHour: number = Number(timeArr[0]);
@@ -847,6 +857,7 @@ function convertTime(time: string): string {
     timeHour = timeHour % 12 || 12;  // Convert "00" to "12" for AM
     return timeHour + ":" + timeMin + " " + timeFormat;
 }
+
 function convertTimeTo24HourFormat(time: string): string {
     const [hours, minutes] = time.split(/:| /);
     const period = time.slice(-2);
