@@ -17,21 +17,36 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('User Name:', userImePrezime);
     initCalendar();
     fetchAndCombineReservations();
+    makeGrid();
 });
+function makeGrid(event?: Event): void {
+    if (event) event.preventDefault();
 
+    const height: number = 14;
+    const width: number = 8;
 
-function updateTimeOptions(startSelect: HTMLSelectElement | null, endSelect: HTMLSelectElement | null): void {
-    if (!startSelect || !endSelect) return;
+    const tbl = document.getElementById("dynamicGrid") as HTMLTableElement;
+    const timeLabels = document.getElementById("timeLabels") as HTMLElement;
 
-    const activeDay = document.querySelector(".day.active");
-    if (!activeDay) return;
+    tbl.innerHTML = '';
+    timeLabels.innerHTML = '';
 
-    const dayOfWeek = parseInt(activeDay.getAttribute("data-day-of-the-week"), 10);
-    const radnoVreme = radnoVremeData.find(data => data.danUNedelji === dayOfWeek);
-    if (!radnoVreme) return;
+    const headerRow = tbl.insertRow();
+    for (let i = 0; i < width; i++) {
+        const headerCell = document.createElement('th');
+        headerCell.textContent = `Sto ${i + 1}`;
+        headerRow.appendChild(headerCell);
+    }
 
-    const startTime = radnoVreme.vremeOtvaranja.substring(0, 5);
-    const endTime = radnoVreme.vremeZatvaranja.substring(0, 5);
+    for (let i = 0; i < height; i++) {
+        const myRow = tbl.insertRow();
+
+        for (let j = 0; j < width; j++) {
+            const myCell = myRow.insertCell();
+            myCell.style.border = '1px solid #ddd'; 
+            myCell.style.backgroundColor = '#fff'; 
+        }
+    }
 }
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -44,7 +59,6 @@ const gotoBtn: HTMLElement | null = document.querySelector(".goto-btn");
 const dateInput: HTMLInputElement | null = document.querySelector(".date-input");
 const eventDay: HTMLElement | null = document.querySelector(".event-day");
 const eventDate: HTMLElement | null = document.querySelector(".event-date");
-const eventsContainer: HTMLElement | null = document.querySelector(".events");
 const allReservationsContainer: HTMLElement | null = document.querySelector(".all-reservations");
 
 let today: Date = new Date();
@@ -103,7 +117,7 @@ async function fetchAndCombineReservations(): Promise<void> {
     if (Array.isArray(reservations) && reservations.length > 0) {
         mergeReservationsWithGroups(reservations, groupReservations);
         updateCalendarWithReservations();
-        displayAllReservations(); // Display all reservations below the calendar
+        displayAllReservations();
     } else {
         console.log("No reservations found");
     }
@@ -177,7 +191,6 @@ function updateReservationsArray(reservations: any[]): void {
 
 function updateCalendarWithReservations(): void {
     if (activeDay) {
-        updateEvents(activeDay);
     } else {
         initCalendar();
     }
@@ -227,7 +240,6 @@ function initCalendar(): void {
         ) {
             activeDay = i;
             getActiveDay(i);
-            updateEvents(i);
             if (event) {
                 days += `<div class="day today active event" data-day-of-the-week="${weekDay}">${i}</div>`;
             } else {
@@ -286,7 +298,6 @@ function addListner(): void {
         day.addEventListener("click", (e: MouseEvent) => {
             const target = e.target as HTMLElement;
             getActiveDay(Number(target.innerHTML));
-            updateEvents(Number(target.innerHTML));
             activeDay = Number(target.innerHTML);
             days.forEach((day) => {
                 day.classList.remove("active");
@@ -378,40 +389,40 @@ function getActiveDay(date: number): void {
     }
 }
 
-function updateEvents(date: number): void {
-    let events = "";
+//function updateEvents(date: number): void {
+//    let events = "";
 
-    eventsArr.forEach((event) => {
-        if (
-            date === event.day &&
-            month + 1 === event.month &&
-            year === event.year
-        ) {
-            event.events.forEach((event) => {
-                const stolovi = event.stolovi ? `Stolovi: ${event.stolovi.join(', ')}` : '';
-                events += `<div class="event">
-                    <div class="title">
-                        <i class="fas fa-circle"></i>
-                        <h3 class="event-title">${event.title}</h3>
-                    </div>
-                    <div class="event-time">
-                        <span class="event-time">${event.time}</span>
-                        <br>
-                        <span class="event-tables">${stolovi}</span>
-                    </div>
-                </div>`;
-            });
-        }
-    });
+//    eventsArr.forEach((event) => {
+//        if (
+//            date === event.day &&
+//            month + 1 === event.month &&
+//            year === event.year
+//        ) {
+//            event.events.forEach((event) => {
+//                const stolovi = event.stolovi ? `Stolovi: ${event.stolovi.join(', ')}` : '';
+//                events += `<div class="event">
+//                    <div class="title">
+//                        <i class="fas fa-circle"></i>
+//                        <h3 class="event-title">${event.title}</h3>
+//                    </div>
+//                    <div class="event-time">
+//                        <span class="event-time">${event.time}</span>
+//                        <br>
+//                        <span class="event-tables">${stolovi}</span>
+//                    </div>
+//                </div>`;
+//            });
+//        }
+//    });
 
-    if (events === "") {
-        events = `<div class="no-event"><h3>No Events</h3></div>`;
-    }
+//    if (events === "") {
+//        events = `<div class="no-event"><h3>No Events</h3></div>`;
+//    }
 
-    if (eventsContainer) {
-        eventsContainer.innerHTML = events;
-    }
-}
+//    if (eventsContainer) {
+//        eventsContainer.innerHTML = events;
+//    }
+//}
 
 function displayAllReservations(): void {
     let allReservationsHTML = "";
@@ -436,19 +447,18 @@ function displayAllReservations(): void {
     if (allReservationsContainer) {
         allReservationsContainer.innerHTML = allReservationsHTML;
 
-        // Add click event listener to each reservation to navigate to the respective date
+
         const reservations = allReservationsContainer.querySelectorAll('.reservation');
         reservations.forEach((reservation) => {
             reservation.addEventListener('click', (e) => {
                 const target = e.currentTarget as HTMLElement;
                 const day = Number(target.getAttribute('data-day'));
-                const month = Number(target.getAttribute('data-month')) - 1; // month is 0-indexed
+                const month = Number(target.getAttribute('data-month')) - 1; 
                 const year = Number(target.getAttribute('data-year'));
 
                 activeDay = day;
                 setYearAndMonth(year, month);
                 initCalendar();
-                updateEvents(day);
                 document.querySelectorAll('.day').forEach((dayElem) => {
                     if (Number(dayElem.innerHTML) === day && !dayElem.classList.contains('prev-date') && !dayElem.classList.contains('next-date')) {
                         dayElem.classList.add('active');
@@ -578,15 +588,6 @@ async function sendGroupReservationToServer(groupReservationDataArray: any[]): P
             console.log('Non-JSON response received');
         }
     }
-}
-
-function convertTime(time: string): string {
-    let timeArr: string[] = time.split(":");
-    let timeHour: number = Number(timeArr[0]);
-    let timeMin: string = timeArr[1];
-    let timeFormat: string = timeHour >= 12 ? "PM" : "AM";
-    timeHour = timeHour % 12 || 12;  // Convert "00" to "12" for AM
-    return timeHour + ":" + timeMin + " " + timeFormat;
 }
 
 function convertTimeTo24HourFormat(time: string): string {

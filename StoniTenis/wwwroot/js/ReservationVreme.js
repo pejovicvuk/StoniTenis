@@ -22,19 +22,35 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('User Name:', userImePrezime);
     initCalendar();
     fetchAndCombineReservations();
+    makeGrid();
 });
-function updateTimeOptions(startSelect, endSelect) {
-    if (!startSelect || !endSelect)
-        return;
-    const activeDay = document.querySelector(".day.active");
-    if (!activeDay)
-        return;
-    const dayOfWeek = parseInt(activeDay.getAttribute("data-day-of-the-week"), 10);
-    const radnoVreme = radnoVremeData.find(data => data.danUNedelji === dayOfWeek);
-    if (!radnoVreme)
-        return;
-    const startTime = radnoVreme.vremeOtvaranja.substring(0, 5);
-    const endTime = radnoVreme.vremeZatvaranja.substring(0, 5);
+function makeGrid(event) {
+    if (event)
+        event.preventDefault();
+    // Get grid dimensions from input fields
+    const height = 14;
+    const width = 8;
+    const tbl = document.getElementById("dynamicGrid");
+    const timeLabels = document.getElementById("timeLabels");
+    // Clear any existing content
+    tbl.innerHTML = '';
+    timeLabels.innerHTML = '';
+    // Create column headers for days
+    const headerRow = tbl.insertRow();
+    for (let i = 0; i < width; i++) {
+        const headerCell = document.createElement('th');
+        headerCell.textContent = `Sto ${i + 1}`;
+        headerRow.appendChild(headerCell);
+    }
+    // Create the grid and time labels
+    for (let i = 0; i < height; i++) {
+        const myRow = tbl.insertRow();
+        for (let j = 0; j < width; j++) {
+            const myCell = myRow.insertCell();
+            myCell.style.border = '1px solid #ddd'; // Subtle grid lines
+            myCell.style.backgroundColor = '#fff'; // White background for cells
+        }
+    }
 }
 const urlParams = new URLSearchParams(window.location.search);
 const date = document.querySelector(".date");
@@ -46,7 +62,6 @@ const gotoBtn = document.querySelector(".goto-btn");
 const dateInput = document.querySelector(".date-input");
 const eventDay = document.querySelector(".event-day");
 const eventDate = document.querySelector(".event-date");
-const eventsContainer = document.querySelector(".events");
 const allReservationsContainer = document.querySelector(".all-reservations");
 let today = new Date();
 let activeDay;
@@ -89,7 +104,7 @@ function fetchAndCombineReservations() {
         if (Array.isArray(reservations) && reservations.length > 0) {
             mergeReservationsWithGroups(reservations, groupReservations);
             updateCalendarWithReservations();
-            displayAllReservations(); // Display all reservations below the calendar
+            displayAllReservations();
         }
         else {
             console.log("No reservations found");
@@ -156,7 +171,6 @@ function updateReservationsArray(reservations) {
 }
 function updateCalendarWithReservations() {
     if (activeDay) {
-        updateEvents(activeDay);
     }
     else {
         initCalendar();
@@ -197,7 +211,6 @@ function initCalendar() {
             month === new Date().getMonth()) {
             activeDay = i;
             getActiveDay(i);
-            updateEvents(i);
             if (event) {
                 days += `<div class="day today active event" data-day-of-the-week="${weekDay}">${i}</div>`;
             }
@@ -253,7 +266,6 @@ function addListner() {
         day.addEventListener("click", (e) => {
             const target = e.target;
             getActiveDay(Number(target.innerHTML));
-            updateEvents(Number(target.innerHTML));
             activeDay = Number(target.innerHTML);
             days.forEach((day) => {
                 day.classList.remove("active");
@@ -337,35 +349,37 @@ function getActiveDay(date) {
         eventDate.innerHTML = date + " " + months[month] + " " + year;
     }
 }
-function updateEvents(date) {
-    let events = "";
-    eventsArr.forEach((event) => {
-        if (date === event.day &&
-            month + 1 === event.month &&
-            year === event.year) {
-            event.events.forEach((event) => {
-                const stolovi = event.stolovi ? `Stolovi: ${event.stolovi.join(', ')}` : '';
-                events += `<div class="event">
-                    <div class="title">
-                        <i class="fas fa-circle"></i>
-                        <h3 class="event-title">${event.title}</h3>
-                    </div>
-                    <div class="event-time">
-                        <span class="event-time">${event.time}</span>
-                        <br>
-                        <span class="event-tables">${stolovi}</span>
-                    </div>
-                </div>`;
-            });
-        }
-    });
-    if (events === "") {
-        events = `<div class="no-event"><h3>No Events</h3></div>`;
-    }
-    if (eventsContainer) {
-        eventsContainer.innerHTML = events;
-    }
-}
+//function updateEvents(date: number): void {
+//    let events = "";
+//    eventsArr.forEach((event) => {
+//        if (
+//            date === event.day &&
+//            month + 1 === event.month &&
+//            year === event.year
+//        ) {
+//            event.events.forEach((event) => {
+//                const stolovi = event.stolovi ? `Stolovi: ${event.stolovi.join(', ')}` : '';
+//                events += `<div class="event">
+//                    <div class="title">
+//                        <i class="fas fa-circle"></i>
+//                        <h3 class="event-title">${event.title}</h3>
+//                    </div>
+//                    <div class="event-time">
+//                        <span class="event-time">${event.time}</span>
+//                        <br>
+//                        <span class="event-tables">${stolovi}</span>
+//                    </div>
+//                </div>`;
+//            });
+//        }
+//    });
+//    if (events === "") {
+//        events = `<div class="no-event"><h3>No Events</h3></div>`;
+//    }
+//    if (eventsContainer) {
+//        eventsContainer.innerHTML = events;
+//    }
+//}
 function displayAllReservations() {
     let allReservationsHTML = "";
     eventsArr.forEach((eventObj) => {
@@ -384,18 +398,16 @@ function displayAllReservations() {
     }
     if (allReservationsContainer) {
         allReservationsContainer.innerHTML = allReservationsHTML;
-        // Add click event listener to each reservation to navigate to the respective date
         const reservations = allReservationsContainer.querySelectorAll('.reservation');
         reservations.forEach((reservation) => {
             reservation.addEventListener('click', (e) => {
                 const target = e.currentTarget;
                 const day = Number(target.getAttribute('data-day'));
-                const month = Number(target.getAttribute('data-month')) - 1; // month is 0-indexed
+                const month = Number(target.getAttribute('data-month')) - 1;
                 const year = Number(target.getAttribute('data-year'));
                 activeDay = day;
                 setYearAndMonth(year, month);
                 initCalendar();
-                updateEvents(day);
                 document.querySelectorAll('.day').forEach((dayElem) => {
                     if (Number(dayElem.innerHTML) === day && !dayElem.classList.contains('prev-date') && !dayElem.classList.contains('next-date')) {
                         dayElem.classList.add('active');
@@ -511,14 +523,6 @@ function sendGroupReservationToServer(groupReservationDataArray) {
             }
         }
     });
-}
-function convertTime(time) {
-    let timeArr = time.split(":");
-    let timeHour = Number(timeArr[0]);
-    let timeMin = timeArr[1];
-    let timeFormat = timeHour >= 12 ? "PM" : "AM";
-    timeHour = timeHour % 12 || 12; // Convert "00" to "12" for AM
-    return timeHour + ":" + timeMin + " " + timeFormat;
 }
 function convertTimeTo24HourFormat(time) {
     const [hours, minutes] = time.split(/:| /);
