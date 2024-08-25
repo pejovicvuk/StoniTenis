@@ -19,31 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchAndCombineReservations();
 });
 
-const selectedTables: string[] = [];
-
-function setupSeatSelection(): void {
-    const seats = document.querySelectorAll('.seat');
-
-    seats.forEach(seat => {
-        seat.addEventListener('click', () => {
-            const seatElement = seat as HTMLElement;
-            const seatId = seatElement.id;
-
-            if (seatElement.classList.contains('selected')) {
-                seatElement.classList.remove('selected');
-                const index = selectedTables.indexOf(seatId);
-                if (index > -1) {
-                    selectedTables.splice(index, 1);
-                }
-            } else {
-                seatElement.classList.add('selected');
-                selectedTables.push(seatId);
-            }
-
-            updateTimeOptions(selectPocetak, selectKraj);
-        });
-    });
-}
 
 function updateTimeOptions(startSelect: HTMLSelectElement | null, endSelect: HTMLSelectElement | null): void {
     if (!startSelect || !endSelect) return;
@@ -57,11 +32,7 @@ function updateTimeOptions(startSelect: HTMLSelectElement | null, endSelect: HTM
 
     const startTime = radnoVreme.vremeOtvaranja.substring(0, 5);
     const endTime = radnoVreme.vremeZatvaranja.substring(0, 5);
-
-    populateSelectOptions(startSelect, startTime, endTime);
-    populateSelectOptions(endSelect, startTime, endTime);
 }
-setupSeatSelection();
 
 const urlParams = new URLSearchParams(window.location.search);
 const date: HTMLElement | null = document.querySelector(".date");
@@ -74,16 +45,6 @@ const dateInput: HTMLInputElement | null = document.querySelector(".date-input")
 const eventDay: HTMLElement | null = document.querySelector(".event-day");
 const eventDate: HTMLElement | null = document.querySelector(".event-date");
 const eventsContainer: HTMLElement | null = document.querySelector(".events");
-const addEventBtn: HTMLElement | null = document.querySelector(".add-event");
-const addEventWrapper: HTMLElement | null = document.querySelector(".add-event-wrapper");
-const addEventCloseBtn: HTMLElement | null = document.querySelector(".close");
-const addEventTitle: HTMLInputElement | null = document.querySelector(".event-name");
-const addEventFrom: HTMLInputElement | null = document.querySelector(".event-time-from");
-const addEventTo: HTMLInputElement | null = document.querySelector(".event-time-to");
-const addEventSubmit: HTMLElement | null = document.querySelector(".add-event-btn");
-const selectPocetak: HTMLSelectElement | null = document.querySelector(".start-time");
-const selectKraj: HTMLSelectElement | null = document.querySelector(".end-time");
-const stolovi: HTMLElement | null = document.querySelector(".containerStolovi");
 const allReservationsContainer: HTMLElement | null = document.querySelector(".all-reservations");
 
 let today: Date = new Date();
@@ -523,239 +484,9 @@ function proveriRadnoVreme(): void {
     });
 }
 
-if (addEventBtn) {
-    addEventBtn.addEventListener("click", () => {
-        addEventWrapper.classList.toggle("active");
-        const activeDay = document.querySelector(".day.active");
-        const dayOfWeek = parseInt(activeDay.getAttribute("data-day-of-the-week"), 10);
 
-        const radnoVreme = radnoVremeData.find(data => data.danUNedelji === dayOfWeek);
 
-        if (radnoVreme) {
-            addEventTitle.value = userImePrezime;
-            addEventTitle.style.display = "block";
-            addEventSubmit.style.display = "block";
-            selectPocetak.style.display = "block";
-            selectKraj.style.display = "block";
-            stolovi.style.display = "flex";
-            document.getElementById("toLabel").style.display = "block";
-            document.getElementById("lokalMessage").style.display = "none";
-
-            const startTime = radnoVreme.vremeOtvaranja.substring(0, 5);
-            const endTime = radnoVreme.vremeZatvaranja.substring(0, 5);
-
-            populateSelectOptions(selectPocetak, startTime, endTime);
-            populateSelectOptions(selectKraj, startTime, endTime);
-        } else {
-            addEventTitle.style.display = "none";
-            addEventSubmit.style.display = "none";
-            selectPocetak.style.display = "none";
-            selectKraj.style.display = "none";
-            stolovi.style.display = "none";
-            document.getElementById("toLabel").style.display = "none";
-            document.getElementById("lokalMessage").style.display = "block";
-        }
-    });
-}
-
-function populateSelectOptions(selectElement: HTMLSelectElement, start: string, end: string): void {
-    if (!selectElement) return;
-
-    selectElement.innerHTML = '';
-
-    const [startHour, startMinute] = start.split(':').map(Number);
-    const [endHour, endMinute] = end.split(':').map(Number);
-
-    const reservedTimes = eventsArr
-        .filter(eventItem =>
-            eventItem.day === activeDay &&
-            eventItem.month === (month + 1) &&
-            eventItem.year === year &&
-            selectedTables.some(table => eventItem.events.some(event => event.stolovi?.includes(table)))
-        )
-        .flatMap(eventItem =>
-            eventItem.events.filter(event =>
-                event.lokalID === Number(urlParams.get('id')) &&
-                selectedTables.some(table => event.stolovi?.includes(table))
-            )
-        )
-        .map(event => ({
-            start: convertTimeTo24HourFormat(event.time.split(' - ')[0]),
-            end: convertTimeTo24HourFormat(event.time.split(' - ')[1])
-        }));
-
-    let currentHour = startHour;
-    let currentMinute = startMinute;
-
-    while (currentHour < endHour || (currentHour === endHour && currentMinute <= endMinute)) {
-        const currentTime = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
-        const isReserved = reservedTimes.some(reservedTime =>
-            (currentTime > reservedTime.start && currentTime < reservedTime.end)
-        );
-
-        if (!isReserved || currentTime === reservedTimes.find(reservedTime => reservedTime.start === currentTime)?.start || currentTime === reservedTimes.find(reservedTime => reservedTime.end === currentTime)?.end) {
-            const optionElement = new Option(currentTime, currentTime);
-            selectElement.options.add(optionElement);
-        }
-
-        currentMinute += 15;
-        if (currentMinute >= 60) {
-            currentMinute = 0;
-            currentHour += 1;
-        }
-    }
-}
-
-if (addEventCloseBtn) {
-    addEventCloseBtn.addEventListener("click", () => {
-        addEventWrapper.classList.remove("active");
-    });
-}
-
-//document.addEventListener("click", (e: MouseEvent) => {
-//    if (e.target !== addEventBtn && addEventWrapper && !addEventWrapper.contains(e.target as Node)) {
-//        addEventWrapper.classList.remove("active");
-//    });
-//});
-
-if (addEventTitle) {
-    addEventTitle.addEventListener("input", (e: InputEvent) => {
-        addEventTitle.value = addEventTitle.value.slice(0, 60);
-    });
-}
-
-if (addEventFrom) {
-    addEventFrom.addEventListener("input", (e: InputEvent) => {
-        addEventFrom.value = addEventFrom.value.replace(/[^0-9:]/g, "");
-        if (addEventFrom.value.length === 2) {
-            addEventFrom.value += ":";
-        }
-        if (addEventFrom.value.length > 5) {
-            addEventFrom.value = addEventFrom.value.slice(0, 5);
-        }
-    });
-}
-
-if (addEventTo) {
-    addEventTo.addEventListener("input", (e: InputEvent) => {
-        addEventTo.value = addEventTo.value.replace(/[^0-9:]/g, "");
-        if (addEventTo.value.length === 2) {
-            addEventTo.value += ":";
-        }
-        if (addEventTo.value.length > 5) {
-            addEventTo.value = addEventTo.value.slice(0, 5);
-        }
-    });
-}
-
-if (addEventSubmit) {
-    addEventSubmit.addEventListener("click", () => {
-        const eventTitle: string = addEventTitle ? addEventTitle.value : "";
-        const eventTimeFrom: string = selectPocetak ? selectPocetak.value : "";
-        const eventTimeTo: string = selectKraj ? selectKraj.value : "";
-
-        if (eventTitle === "" || eventTimeFrom === "" || eventTimeTo === "") {
-            alert("Please fill all the fields");
-            return;
-        }
-
-        const timeFromArr: string[] = eventTimeFrom.split(":");
-        const timeToArr: string[] = eventTimeTo.split(":");
-
-        if (
-            timeFromArr.length !== 2 ||
-            timeToArr.length !== 2 ||
-            Number(timeFromArr[0]) > 23 ||
-            Number(timeFromArr[1]) > 59 ||
-            Number(timeToArr[0]) > 23 ||
-            Number(timeToArr[1]) > 59
-        ) {
-            alert("Invalid Time Format");
-            return;
-        }
-
-        const timeFrom: string = convertTime(eventTimeFrom);
-        const timeTo: string = convertTime(eventTimeTo);
-
-        const newEvent = {
-            title: eventTitle,
-            time: `${timeFrom} - ${timeTo}`,
-            korisnikID: userID,
-            lokalID: Number(urlParams.get('id')),
-            stolovi: selectedTables.slice(),
-        };
-        let eventExist: boolean = false;
-
-        eventsArr.forEach((event) => {
-            if (
-                event.day === activeDay &&
-                event.month === month + 1 &&
-                event.year === year
-            ) {
-                event.events.forEach((event) => {
-                    if (event.title === eventTitle) {
-                        eventExist = true;
-                    }
-                });
-            }
-        });
-
-        if (eventExist) {
-            alert("Event already added");
-            return;
-        }
-
-        let eventAdded: boolean = false;
-
-        if (eventsArr.length > 0) {
-            eventsArr.forEach((item) => {
-                if (
-                    item.day === activeDay &&
-                    item.month === month + 1 &&
-                    item.year === year
-                ) {
-                    item.events.push(newEvent);
-                    eventAdded = true;
-                }
-            });
-        }
-
-        if (!eventAdded) {
-            eventsArr.push({
-                day: activeDay!,
-                month: month + 1,
-                year: year,
-                events: [newEvent],
-            });
-        }
-
-        addEventWrapper.classList.remove("active");
-        addEventTitle.value = "";
-        selectPocetak.value = "";
-        selectKraj.value = "";
-
-        selectedTables.length = 0;
-        document.querySelectorAll('.seat.selected').forEach(seat => {
-            seat.classList.remove('selected');
-        });
-
-        updateEvents(activeDay!);
-        const activeDayEl = document.querySelector(".day.active");
-        if (activeDayEl && !activeDayEl.classList.contains("event")) {
-            activeDayEl.classList.add("event");
-        }
-
-        const reservations = createReservationAndGroupReservationJson(eventsArr);
-
-        if (reservations) {
-            reservations.forEach(reservation => {
-                sendReservationToServer(reservation.reservationData, reservation.groupReservationData);
-            });
-        }
-        console.log(eventsArr);
-    });
-}
-
+//kreiranje rezervacija
 function createReservationAndGroupReservationJson(eventsArr) {
     const results = [];
 

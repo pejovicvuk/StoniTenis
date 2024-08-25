@@ -23,28 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initCalendar();
     fetchAndCombineReservations();
 });
-const selectedTables = [];
-function setupSeatSelection() {
-    const seats = document.querySelectorAll('.seat');
-    seats.forEach(seat => {
-        seat.addEventListener('click', () => {
-            const seatElement = seat;
-            const seatId = seatElement.id;
-            if (seatElement.classList.contains('selected')) {
-                seatElement.classList.remove('selected');
-                const index = selectedTables.indexOf(seatId);
-                if (index > -1) {
-                    selectedTables.splice(index, 1);
-                }
-            }
-            else {
-                seatElement.classList.add('selected');
-                selectedTables.push(seatId);
-            }
-            updateTimeOptions(selectPocetak, selectKraj);
-        });
-    });
-}
 function updateTimeOptions(startSelect, endSelect) {
     if (!startSelect || !endSelect)
         return;
@@ -57,10 +35,7 @@ function updateTimeOptions(startSelect, endSelect) {
         return;
     const startTime = radnoVreme.vremeOtvaranja.substring(0, 5);
     const endTime = radnoVreme.vremeZatvaranja.substring(0, 5);
-    populateSelectOptions(startSelect, startTime, endTime);
-    populateSelectOptions(endSelect, startTime, endTime);
 }
-setupSeatSelection();
 const urlParams = new URLSearchParams(window.location.search);
 const date = document.querySelector(".date");
 const daysContainer = document.querySelector(".days");
@@ -72,16 +47,6 @@ const dateInput = document.querySelector(".date-input");
 const eventDay = document.querySelector(".event-day");
 const eventDate = document.querySelector(".event-date");
 const eventsContainer = document.querySelector(".events");
-const addEventBtn = document.querySelector(".add-event");
-const addEventWrapper = document.querySelector(".add-event-wrapper");
-const addEventCloseBtn = document.querySelector(".close");
-const addEventTitle = document.querySelector(".event-name");
-const addEventFrom = document.querySelector(".event-time-from");
-const addEventTo = document.querySelector(".event-time-to");
-const addEventSubmit = document.querySelector(".add-event-btn");
-const selectPocetak = document.querySelector(".start-time");
-const selectKraj = document.querySelector(".end-time");
-const stolovi = document.querySelector(".containerStolovi");
 const allReservationsContainer = document.querySelector(".all-reservations");
 let today = new Date();
 let activeDay;
@@ -463,194 +428,7 @@ function proveriRadnoVreme() {
         }
     });
 }
-if (addEventBtn) {
-    addEventBtn.addEventListener("click", () => {
-        addEventWrapper.classList.toggle("active");
-        const activeDay = document.querySelector(".day.active");
-        const dayOfWeek = parseInt(activeDay.getAttribute("data-day-of-the-week"), 10);
-        const radnoVreme = radnoVremeData.find(data => data.danUNedelji === dayOfWeek);
-        if (radnoVreme) {
-            addEventTitle.value = userImePrezime;
-            addEventTitle.style.display = "block";
-            addEventSubmit.style.display = "block";
-            selectPocetak.style.display = "block";
-            selectKraj.style.display = "block";
-            stolovi.style.display = "flex";
-            document.getElementById("toLabel").style.display = "block";
-            document.getElementById("lokalMessage").style.display = "none";
-            const startTime = radnoVreme.vremeOtvaranja.substring(0, 5);
-            const endTime = radnoVreme.vremeZatvaranja.substring(0, 5);
-            populateSelectOptions(selectPocetak, startTime, endTime);
-            populateSelectOptions(selectKraj, startTime, endTime);
-        }
-        else {
-            addEventTitle.style.display = "none";
-            addEventSubmit.style.display = "none";
-            selectPocetak.style.display = "none";
-            selectKraj.style.display = "none";
-            stolovi.style.display = "none";
-            document.getElementById("toLabel").style.display = "none";
-            document.getElementById("lokalMessage").style.display = "block";
-        }
-    });
-}
-function populateSelectOptions(selectElement, start, end) {
-    var _a, _b;
-    if (!selectElement)
-        return;
-    selectElement.innerHTML = '';
-    const [startHour, startMinute] = start.split(':').map(Number);
-    const [endHour, endMinute] = end.split(':').map(Number);
-    const reservedTimes = eventsArr
-        .filter(eventItem => eventItem.day === activeDay &&
-        eventItem.month === (month + 1) &&
-        eventItem.year === year &&
-        selectedTables.some(table => eventItem.events.some(event => { var _a; return (_a = event.stolovi) === null || _a === void 0 ? void 0 : _a.includes(table); })))
-        .flatMap(eventItem => eventItem.events.filter(event => event.lokalID === Number(urlParams.get('id')) &&
-        selectedTables.some(table => { var _a; return (_a = event.stolovi) === null || _a === void 0 ? void 0 : _a.includes(table); })))
-        .map(event => ({
-        start: convertTimeTo24HourFormat(event.time.split(' - ')[0]),
-        end: convertTimeTo24HourFormat(event.time.split(' - ')[1])
-    }));
-    let currentHour = startHour;
-    let currentMinute = startMinute;
-    while (currentHour < endHour || (currentHour === endHour && currentMinute <= endMinute)) {
-        const currentTime = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
-        const isReserved = reservedTimes.some(reservedTime => (currentTime > reservedTime.start && currentTime < reservedTime.end));
-        if (!isReserved || currentTime === ((_a = reservedTimes.find(reservedTime => reservedTime.start === currentTime)) === null || _a === void 0 ? void 0 : _a.start) || currentTime === ((_b = reservedTimes.find(reservedTime => reservedTime.end === currentTime)) === null || _b === void 0 ? void 0 : _b.end)) {
-            const optionElement = new Option(currentTime, currentTime);
-            selectElement.options.add(optionElement);
-        }
-        currentMinute += 15;
-        if (currentMinute >= 60) {
-            currentMinute = 0;
-            currentHour += 1;
-        }
-    }
-}
-if (addEventCloseBtn) {
-    addEventCloseBtn.addEventListener("click", () => {
-        addEventWrapper.classList.remove("active");
-    });
-}
-//document.addEventListener("click", (e: MouseEvent) => {
-//    if (e.target !== addEventBtn && addEventWrapper && !addEventWrapper.contains(e.target as Node)) {
-//        addEventWrapper.classList.remove("active");
-//    });
-//});
-if (addEventTitle) {
-    addEventTitle.addEventListener("input", (e) => {
-        addEventTitle.value = addEventTitle.value.slice(0, 60);
-    });
-}
-if (addEventFrom) {
-    addEventFrom.addEventListener("input", (e) => {
-        addEventFrom.value = addEventFrom.value.replace(/[^0-9:]/g, "");
-        if (addEventFrom.value.length === 2) {
-            addEventFrom.value += ":";
-        }
-        if (addEventFrom.value.length > 5) {
-            addEventFrom.value = addEventFrom.value.slice(0, 5);
-        }
-    });
-}
-if (addEventTo) {
-    addEventTo.addEventListener("input", (e) => {
-        addEventTo.value = addEventTo.value.replace(/[^0-9:]/g, "");
-        if (addEventTo.value.length === 2) {
-            addEventTo.value += ":";
-        }
-        if (addEventTo.value.length > 5) {
-            addEventTo.value = addEventTo.value.slice(0, 5);
-        }
-    });
-}
-if (addEventSubmit) {
-    addEventSubmit.addEventListener("click", () => {
-        const eventTitle = addEventTitle ? addEventTitle.value : "";
-        const eventTimeFrom = selectPocetak ? selectPocetak.value : "";
-        const eventTimeTo = selectKraj ? selectKraj.value : "";
-        if (eventTitle === "" || eventTimeFrom === "" || eventTimeTo === "") {
-            alert("Please fill all the fields");
-            return;
-        }
-        const timeFromArr = eventTimeFrom.split(":");
-        const timeToArr = eventTimeTo.split(":");
-        if (timeFromArr.length !== 2 ||
-            timeToArr.length !== 2 ||
-            Number(timeFromArr[0]) > 23 ||
-            Number(timeFromArr[1]) > 59 ||
-            Number(timeToArr[0]) > 23 ||
-            Number(timeToArr[1]) > 59) {
-            alert("Invalid Time Format");
-            return;
-        }
-        const timeFrom = convertTime(eventTimeFrom);
-        const timeTo = convertTime(eventTimeTo);
-        const newEvent = {
-            title: eventTitle,
-            time: `${timeFrom} - ${timeTo}`,
-            korisnikID: userID,
-            lokalID: Number(urlParams.get('id')),
-            stolovi: selectedTables.slice(),
-        };
-        let eventExist = false;
-        eventsArr.forEach((event) => {
-            if (event.day === activeDay &&
-                event.month === month + 1 &&
-                event.year === year) {
-                event.events.forEach((event) => {
-                    if (event.title === eventTitle) {
-                        eventExist = true;
-                    }
-                });
-            }
-        });
-        if (eventExist) {
-            alert("Event already added");
-            return;
-        }
-        let eventAdded = false;
-        if (eventsArr.length > 0) {
-            eventsArr.forEach((item) => {
-                if (item.day === activeDay &&
-                    item.month === month + 1 &&
-                    item.year === year) {
-                    item.events.push(newEvent);
-                    eventAdded = true;
-                }
-            });
-        }
-        if (!eventAdded) {
-            eventsArr.push({
-                day: activeDay,
-                month: month + 1,
-                year: year,
-                events: [newEvent],
-            });
-        }
-        addEventWrapper.classList.remove("active");
-        addEventTitle.value = "";
-        selectPocetak.value = "";
-        selectKraj.value = "";
-        selectedTables.length = 0;
-        document.querySelectorAll('.seat.selected').forEach(seat => {
-            seat.classList.remove('selected');
-        });
-        updateEvents(activeDay);
-        const activeDayEl = document.querySelector(".day.active");
-        if (activeDayEl && !activeDayEl.classList.contains("event")) {
-            activeDayEl.classList.add("event");
-        }
-        const reservations = createReservationAndGroupReservationJson(eventsArr);
-        if (reservations) {
-            reservations.forEach(reservation => {
-                sendReservationToServer(reservation.reservationData, reservation.groupReservationData);
-            });
-        }
-        console.log(eventsArr);
-    });
-}
+//kreiranje rezervacija
 function createReservationAndGroupReservationJson(eventsArr) {
     const results = [];
     if (eventsArr.length === 0) {
