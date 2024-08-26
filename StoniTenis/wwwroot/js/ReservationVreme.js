@@ -41,7 +41,18 @@ function fetchBrojStolovaLokal() {
 function makeGrid(event) {
     if (event)
         event.preventDefault();
-    const height = 18;
+    const selectedDayElement = document.querySelector('.day.active');
+    if (!selectedDayElement)
+        return;
+    const dayOfWeek = parseInt(selectedDayElement.getAttribute('data-day-of-the-week') || '0');
+    const radnoVreme = radnoVremeData.find(data => data.danUNedelji === dayOfWeek);
+    if (!radnoVreme) {
+        console.log('No working hours found for this day');
+        return;
+    }
+    const openingTime = parseInt(radnoVreme.vremeOtvaranja.split(':')[0]);
+    const closingTime = parseInt(radnoVreme.vremeZatvaranja.split(':')[0]);
+    const height = closingTime - openingTime;
     fetchBrojStolovaLokal().then((width) => {
         const tbl = document.getElementById("dynamicGrid");
         const timeLabels = document.getElementById("timeLabels");
@@ -54,14 +65,36 @@ function makeGrid(event) {
             headerCell.style.color = '#373C4f';
             headerRow.appendChild(headerCell);
         }
-        for (let i = 0; i < height; i++) {
+        const initialBlankDiv = document.createElement('div');
+        initialBlankDiv.className = 'time-label';
+        initialBlankDiv.style.height = '40px';
+        timeLabels.appendChild(initialBlankDiv);
+        for (let i = 0; i <= height; i++) {
             const myRow = tbl.insertRow();
+            const timeSlot = openingTime + i;
+            const timeLabel = `${timeSlot}:00`;
+            const timeLabelDiv = document.createElement('div');
+            timeLabelDiv.textContent = timeLabel;
+            timeLabelDiv.className = 'time-label';
+            timeLabelDiv.style.color = '#fff';
+            timeLabelDiv.style.height = '40px';
+            timeLabels.appendChild(timeLabelDiv);
             for (let j = 0; j < width; j++) {
                 const myCell = myRow.insertCell();
                 myCell.style.border = '1px solid #ddd';
                 myCell.style.backgroundColor = '#fff';
             }
         }
+    });
+}
+function addDayClickListener() {
+    const days = document.querySelectorAll(".day");
+    days.forEach((day) => {
+        day.addEventListener("click", () => {
+            days.forEach(d => d.classList.remove('active'));
+            day.classList.add('active');
+            makeGrid();
+        });
     });
 }
 const urlParams = new URLSearchParams(window.location.search);
@@ -94,7 +127,6 @@ const months = [
     "December",
 ];
 const eventsArr = [];
-// Fetching reservations and group reservations from the server
 function fetchAndCombineReservations() {
     return __awaiter(this, void 0, void 0, function* () {
         const reservationUrl = `/Reservation/get-reservation?korisnikID=${userID}`;
@@ -249,6 +281,7 @@ function initCalendar() {
     }
     proveriRadnoVreme();
     addListner();
+    addDayClickListener();
 }
 function prevMonth() {
     month--;
