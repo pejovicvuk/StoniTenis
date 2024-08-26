@@ -51,6 +51,7 @@ function makeGrid(event) {
         for (let i = 0; i < width; i++) {
             const headerCell = document.createElement('th');
             headerCell.textContent = `Sto ${i + 1}`;
+            headerCell.style.color = '#373C4f';
             headerRow.appendChild(headerCell);
         }
         for (let i = 0; i < height; i++) {
