@@ -24,33 +24,44 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchAndCombineReservations();
     makeGrid();
 });
+function fetchBrojStolovaLokal() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const lokalID = Number(urlParams.get('id'));
+        const brojStolovaUrl = `/Reservation/get-brojStolova?lokalID=${lokalID}`;
+        const response = yield fetch(brojStolovaUrl, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        const brojStolova = yield response.json();
+        return brojStolova;
+    });
+}
 function makeGrid(event) {
     if (event)
         event.preventDefault();
-    // Get grid dimensions from input fields
-    const height = 14;
-    const width = 8;
-    const tbl = document.getElementById("dynamicGrid");
-    const timeLabels = document.getElementById("timeLabels");
-    // Clear any existing content
-    tbl.innerHTML = '';
-    timeLabels.innerHTML = '';
-    // Create column headers for days
-    const headerRow = tbl.insertRow();
-    for (let i = 0; i < width; i++) {
-        const headerCell = document.createElement('th');
-        headerCell.textContent = `Sto ${i + 1}`;
-        headerRow.appendChild(headerCell);
-    }
-    // Create the grid and time labels
-    for (let i = 0; i < height; i++) {
-        const myRow = tbl.insertRow();
-        for (let j = 0; j < width; j++) {
-            const myCell = myRow.insertCell();
-            myCell.style.border = '1px solid #ddd'; // Subtle grid lines
-            myCell.style.backgroundColor = '#fff'; // White background for cells
+    const height = 18;
+    fetchBrojStolovaLokal().then((width) => {
+        const tbl = document.getElementById("dynamicGrid");
+        const timeLabels = document.getElementById("timeLabels");
+        tbl.innerHTML = '';
+        timeLabels.innerHTML = '';
+        const headerRow = tbl.insertRow();
+        for (let i = 0; i < width; i++) {
+            const headerCell = document.createElement('th');
+            headerCell.textContent = `Sto ${i + 1}`;
+            headerRow.appendChild(headerCell);
         }
-    }
+        for (let i = 0; i < height; i++) {
+            const myRow = tbl.insertRow();
+            for (let j = 0; j < width; j++) {
+                const myCell = myRow.insertCell();
+                myCell.style.border = '1px solid #ddd';
+                myCell.style.backgroundColor = '#fff';
+            }
+        }
+    });
 }
 const urlParams = new URLSearchParams(window.location.search);
 const date = document.querySelector(".date");

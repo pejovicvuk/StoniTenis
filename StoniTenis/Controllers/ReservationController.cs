@@ -92,6 +92,12 @@ namespace StoniTenis.Controllers
             }
             return grupne;
         }
+        [HttpGet("get-brojStolova")]
+        public async Task<ActionResult<int>> GetBrojStolovaULokalu(int lokalID)
+        {
+            int brojStolova = await _reservationService.BrojStolovaULokalu(lokalID);
+            return Ok(brojStolova); 
+        }
 
     }
 }

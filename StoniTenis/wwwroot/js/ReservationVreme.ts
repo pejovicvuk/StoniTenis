@@ -19,34 +19,50 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchAndCombineReservations();
     makeGrid();
 });
+
+async function fetchBrojStolovaLokal(): Promise<number> {
+    const lokalID = Number(urlParams.get('id'));
+    const brojStolovaUrl = `/Reservation/get-brojStolova?lokalID=${lokalID}`;
+
+    const response = await fetch(brojStolovaUrl, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    });
+    const brojStolova = await response.json();
+    return brojStolova;
+}
 function makeGrid(event?: Event): void {
     if (event) event.preventDefault();
 
-    const height: number = 14;
-    const width: number = 8;
+    const height: number = 18;
 
-    const tbl = document.getElementById("dynamicGrid") as HTMLTableElement;
-    const timeLabels = document.getElementById("timeLabels") as HTMLElement;
+    fetchBrojStolovaLokal().then((width: number) => {
 
-    tbl.innerHTML = '';
-    timeLabels.innerHTML = '';
+        const tbl = document.getElementById("dynamicGrid") as HTMLTableElement;
+        const timeLabels = document.getElementById("timeLabels") as HTMLElement;
 
-    const headerRow = tbl.insertRow();
-    for (let i = 0; i < width; i++) {
-        const headerCell = document.createElement('th');
-        headerCell.textContent = `Sto ${i + 1}`;
-        headerRow.appendChild(headerCell);
-    }
+        tbl.innerHTML = '';
+        timeLabels.innerHTML = '';
 
-    for (let i = 0; i < height; i++) {
-        const myRow = tbl.insertRow();
-
-        for (let j = 0; j < width; j++) {
-            const myCell = myRow.insertCell();
-            myCell.style.border = '1px solid #ddd'; 
-            myCell.style.backgroundColor = '#fff'; 
+        const headerRow = tbl.insertRow();
+        for (let i = 0; i < width; i++) {
+            const headerCell = document.createElement('th');
+            headerCell.textContent = `Sto ${i + 1}`;
+            headerRow.appendChild(headerCell);
         }
-    }
+
+        for (let i = 0; i < height; i++) {
+            const myRow = tbl.insertRow();
+
+            for (let j = 0; j < width; j++) {
+                const myCell = myRow.insertCell();
+                myCell.style.border = '1px solid #ddd';
+                myCell.style.backgroundColor = '#fff';
+            }
+        }
+    });
 }
 
 const urlParams = new URLSearchParams(window.location.search);

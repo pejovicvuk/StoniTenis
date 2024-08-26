@@ -139,5 +139,21 @@ namespace StoniTenis.Models.Services
                 }
             }
         }
+        public async Task<int> BrojStolovaULokalu(int lokalID)
+        {
+            using (SqlConnection conn = _connectionService.GetConnection())
+            {
+                await conn.OpenAsync(); 
+                string sql = "SELECT COUNT(DISTINCT broj_stola) FROM stolovi WHERE lokal_id = @LokalID";
+
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@LokalID", lokalID);
+                    int brojStolova = (await cmd.ExecuteScalarAsync() as int?) ?? 0;
+                    return brojStolova;
+                }
+            }
+        }
+
     }
 }
