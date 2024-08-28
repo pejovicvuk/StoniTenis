@@ -50,16 +50,17 @@ function makeGrid(event) {
         console.error('No working hours found for this day.');
         return;
     }
-    const openingTime = parseInt(radnoVreme.vremeOtvaranja.split(':')[0], 10);
-    const closingTime = parseInt(radnoVreme.vremeZatvaranja.split(':')[0], 10);
-    const height = closingTime - openingTime;
+    const openingHours = parseInt(radnoVreme.vremeOtvaranja.split(':')[0], 10);
+    const openingMinutes = parseInt(radnoVreme.vremeOtvaranja.split(':')[1], 10);
+    const closingHours = parseInt(radnoVreme.vremeZatvaranja.split(':')[0], 10);
+    const closingMinutes = parseInt(radnoVreme.vremeZatvaranja.split(':')[1], 10);
     fetchBrojStolovaLokal().then(width => {
         const tbl = document.getElementById('dynamicGrid');
         if (!tbl) {
             console.error('Table element not found');
             return;
         }
-        const table = tbl; // Ensure the table is treated as an HTMLTableElement
+        const table = tbl;
         const timeLabels = document.getElementById('timeLabels');
         table.innerHTML = '';
         if (timeLabels)
@@ -70,24 +71,29 @@ function makeGrid(event) {
             headerCell.textContent = `Sto ${i + 1}`;
             headerRow.appendChild(headerCell);
         }
-        for (let i = 0; i < height; i++) {
+        let currentHour = openingHours;
+        let isFirstLabel = true;
+        while (currentHour < closingHours || (currentHour === closingHours && (isFirstLabel || currentHour < closingHours))) {
             const row = table.insertRow();
             for (let j = 0; j < width; j++) {
                 row.insertCell();
             }
             if (timeLabels) {
-                const timeSlot = openingTime + i;
                 const timeLabelDiv = document.createElement('div');
-                timeLabelDiv.textContent = `${timeSlot}:00`;
+                if (isFirstLabel) {
+                    timeLabelDiv.textContent = `${currentHour}:${openingMinutes.toString().padStart(2, '0')}`;
+                    isFirstLabel = false; // Mark the first label as done
+                }
+                else {
+                    timeLabelDiv.textContent = `${currentHour}:00`;
+                }
                 timeLabels.appendChild(timeLabelDiv);
             }
+            currentHour++;
         }
-        // Add the last time label without adding a row to the table
-        if (timeLabels) {
-            const finalTimeLabelDiv = document.createElement('div');
-            finalTimeLabelDiv.textContent = `${closingTime}:00`;
-            timeLabels.appendChild(finalTimeLabelDiv);
-        }
+        const finalTimeLabelDiv = document.createElement('div');
+        finalTimeLabelDiv.textContent = `${closingHours}:${closingMinutes.toString().padStart(2, '0')}`;
+        timeLabels.appendChild(finalTimeLabelDiv);
     });
 }
 function addDayClickListener() {
