@@ -36,62 +36,65 @@ async function fetchBrojStolovaLokal(): Promise<number> {
 function makeGrid(event?: Event): void {
     if (event) event.preventDefault();
 
-    const selectedDayElement = document.querySelector('.day.active') as HTMLElement;
+    const selectedDayElement = document.querySelector('.day.active');
     if (!selectedDayElement) return;
 
-    const dayOfWeek = parseInt(selectedDayElement.getAttribute('data-day-of-the-week') || '0');
-    const radnoVreme = radnoVremeData.find(data => data.danUNedelji === dayOfWeek);
-
+    const dayOfWeek = parseInt(selectedDayElement.getAttribute('data-day-of-the-week'), 10);
+    const radnoVreme = radnoVremeData.find(r => r.danUNedelji === dayOfWeek);
     if (!radnoVreme) {
-        console.log('No working hours found for this day');
+        console.error('No working hours found for this day.');
         return;
     }
 
-    const openingTime = parseInt(radnoVreme.vremeOtvaranja.split(':')[0]);
-    const closingTime = parseInt(radnoVreme.vremeZatvaranja.split(':')[0]);
+    const openingTime = parseInt(radnoVreme.vremeOtvaranja.split(':')[0], 10);
+    const closingTime = parseInt(radnoVreme.vremeZatvaranja.split(':')[0], 10);
     const height = closingTime - openingTime;
 
-    fetchBrojStolovaLokal().then((width: number) => {
-        const tbl = document.getElementById("dynamicGrid") as HTMLTableElement;
-        const timeLabels = document.getElementById("timeLabels") as HTMLElement;
+    fetchBrojStolovaLokal().then(width => {
+        const tbl = document.getElementById('dynamicGrid');
+        if (!tbl) {
+            console.error('Table element not found');
+            return;
+        }
 
-        tbl.innerHTML = '';
-        timeLabels.innerHTML = '';
+        const table = tbl as HTMLTableElement; // Ensure the table is treated as an HTMLTableElement
+        const timeLabels = document.getElementById('timeLabels');
 
-        const headerRow = tbl.insertRow();
+        table.innerHTML = '';
+        if (timeLabels) timeLabels.innerHTML = '';
+
+        const headerRow = table.createTHead().insertRow();
         for (let i = 0; i < width; i++) {
             const headerCell = document.createElement('th');
             headerCell.textContent = `Sto ${i + 1}`;
-            headerCell.style.color = '#373C4f';
             headerRow.appendChild(headerCell);
         }
 
-        const initialBlankDiv = document.createElement('div');
-        initialBlankDiv.className = 'time-label';
-        initialBlankDiv.style.height = '40px';
-        timeLabels.appendChild(initialBlankDiv);
-
-        for (let i = 0; i <= height; i++) {
-            const myRow = tbl.insertRow();
-
-            const timeSlot = openingTime + i; 
-            const timeLabel = `${timeSlot}:00`;
-
-            const timeLabelDiv = document.createElement('div');
-            timeLabelDiv.textContent = timeLabel;
-            timeLabelDiv.className = 'time-label';
-            timeLabelDiv.style.color = '#fff';
-            timeLabelDiv.style.height = '40px'; 
-            timeLabels.appendChild(timeLabelDiv);
-
+        for (let i = 0; i < height; i++) {
+            const row = table.insertRow();
             for (let j = 0; j < width; j++) {
-                const myCell = myRow.insertCell();
-                myCell.style.border = '1px solid #ddd';
-                myCell.style.backgroundColor = '#fff';
+                row.insertCell();
             }
+
+            if (timeLabels) {
+                const timeSlot = openingTime + i;
+                const timeLabelDiv = document.createElement('div');
+                timeLabelDiv.textContent = `${timeSlot}:00`;
+                timeLabels.appendChild(timeLabelDiv);
+            }
+        }
+
+        // Add the last time label without adding a row to the table
+        if (timeLabels) {
+            const finalTimeLabelDiv = document.createElement('div');
+            finalTimeLabelDiv.textContent = `${closingTime}:00`;
+            timeLabels.appendChild(finalTimeLabelDiv);
         }
     });
 }
+
+
+
 
 function addDayClickListener(): void {
     const days: NodeListOf<HTMLElement> = document.querySelectorAll(".day");
