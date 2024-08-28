@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initCalendar();
     fetchAndCombineReservations();
     makeGrid();
+    initDragSelection();
 });
 function fetchBrojStolovaLokal() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -42,24 +43,14 @@ function makeGrid(event) {
     if (event)
         event.preventDefault();
     const selectedDayElement = document.querySelector('.day.active');
-    if (!selectedDayElement)
-        return;
     const dayOfWeek = parseInt(selectedDayElement.getAttribute('data-day-of-the-week'), 10);
     const radnoVreme = radnoVremeData.find(r => r.danUNedelji === dayOfWeek);
-    if (!radnoVreme) {
-        console.error('No working hours found for this day.');
-        return;
-    }
     const openingHours = parseInt(radnoVreme.vremeOtvaranja.split(':')[0], 10);
     const openingMinutes = parseInt(radnoVreme.vremeOtvaranja.split(':')[1], 10);
     const closingHours = parseInt(radnoVreme.vremeZatvaranja.split(':')[0], 10);
     const closingMinutes = parseInt(radnoVreme.vremeZatvaranja.split(':')[1], 10);
     fetchBrojStolovaLokal().then(width => {
         const tbl = document.getElementById('dynamicGrid');
-        if (!tbl) {
-            console.error('Table element not found');
-            return;
-        }
         const table = tbl;
         const timeLabels = document.getElementById('timeLabels');
         table.innerHTML = '';
@@ -71,29 +62,117 @@ function makeGrid(event) {
             headerCell.textContent = `Sto ${i + 1}`;
             headerRow.appendChild(headerCell);
         }
-        let currentHour = openingHours;
-        let isFirstLabel = true;
-        while (currentHour < closingHours || (currentHour === closingHours && (isFirstLabel || currentHour < closingHours))) {
+        let currentMinutes = openingHours * 60 + openingMinutes;
+        const totalMinutes = closingHours * 60 + closingMinutes;
+        let firstLabelAdded = false;
+        while (currentMinutes <= totalMinutes) {
             const row = table.insertRow();
             for (let j = 0; j < width; j++) {
                 row.insertCell();
             }
-            if (timeLabels) {
-                const timeLabelDiv = document.createElement('div');
-                if (isFirstLabel) {
-                    timeLabelDiv.textContent = `${currentHour}:${openingMinutes.toString().padStart(2, '0')}`;
-                    isFirstLabel = false; // Mark the first label as done
+            const hours = Math.floor(currentMinutes / 60);
+            const minutes = currentMinutes % 60;
+            if (currentMinutes === openingHours * 60 + openingMinutes ||
+                currentMinutes === totalMinutes ||
+                minutes === 0) {
+                if (timeLabels) {
+                    const timeLabelDiv = document.createElement('div');
+                    timeLabelDiv.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                    //if (timeLabelDiv.textContent.endsWith(':30')) {
+                    //    timeLabelDiv.style.marginTop = "20px";
+                    //    timeLabelDiv.style.position = "absolute";
+                    //}
+                    timeLabels.appendChild(timeLabelDiv);
+                    firstLabelAdded = true;
                 }
-                else {
-                    timeLabelDiv.textContent = `${currentHour}:00`;
-                }
-                timeLabels.appendChild(timeLabelDiv);
             }
-            currentHour++;
+            currentMinutes += 15;
         }
-        const finalTimeLabelDiv = document.createElement('div');
-        finalTimeLabelDiv.textContent = `${closingHours}:${closingMinutes.toString().padStart(2, '0')}`;
-        timeLabels.appendChild(finalTimeLabelDiv);
+    });
+}
+function initDragSelection() {
+    const grid = document.getElementById('dynamicGrid');
+    let isSelecting = false, startTime, endTime, startCell, endCell;
+    if (!grid)
+        return;
+    grid.onmousedown = (event) => {
+        isSelecting = true;
+        startCell = event.target;
+        startTime = getTimeFromCell(startCell);
+        event.preventDefault(); // Prevent text selection
+    };
+    grid.onmouseover = (event) => {
+        if (isSelecting) {
+            endCell = event.target;
+            highlightCells(startCell, endCell);
+        }
+    };
+    grid.onmouseup = (event) => {
+        if (isSelecting) {
+            endCell = event.target;
+            endTime = getTimeFromCell(endCell);
+            console.log(`Reservation starts at ${startTime}, ends at ${endTime}`);
+            isSelecting = false;
+            clearHighlight();
+        }
+    };
+}
+function getTimeFromCell(cell) {
+    const selectedDayElement = document.querySelector('.day.active');
+    const dayOfWeek = parseInt(selectedDayElement.getAttribute('data-day-of-the-week'), 10);
+    const radnoVreme = radnoVremeData.find(r => r.danUNedelji === dayOfWeek);
+    const openingHours = parseInt(radnoVreme.vremeOtvaranja.split(':')[0], 10);
+    const openingMinutes = parseInt(radnoVreme.vremeOtvaranja.split(':')[1], 10);
+    const closingHours = parseInt(radnoVreme.vremeZatvaranja.split(':')[0], 10);
+    const closingMinutes = parseInt(radnoVreme.vremeZatvaranja.split(':')[1], 10);
+    const row = cell.parentNode.rowIndex + parseInt(document.getElementById('timeLabels').children[0].textContent.split(':')[0], 10);
+    console.log(row);
+    const hour = Math.floor(row * 15 / 60);
+    const minute = (row * 15) % 60;
+    return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+}
+function highlightCells(start, end) {
+    // Ensure elements are treated as HTMLTableCellElement
+    const startCell = start;
+    const endCell = end;
+    // Check if both cells are in the same column
+    if (startCell.cellIndex !== endCell.cellIndex) {
+        console.log("Selection must be in the same column.");
+        return;
+    }
+    // Ensure we have valid rows from parent nodes
+    const startRow = startCell.parentElement;
+    const endRow = endCell.parentElement;
+    // Get the range of rows to be highlighted
+    const minRowIdx = Math.min(startRow.rowIndex, endRow.rowIndex);
+    const maxRowIdx = Math.max(startRow.rowIndex, endRow.rowIndex);
+    // Get the grid table element
+    const grid = document.getElementById('dynamicGrid');
+    if (!grid) {
+        console.error("Table element not found");
+        return;
+    }
+    // Reset previous highlights in the same column
+    Array.from(grid.rows).forEach(row => {
+        const cell = row.cells[startCell.cellIndex];
+        if (cell) {
+            cell.classList.remove('highlight');
+        }
+    });
+    // Highlight the selected range in the column
+    for (let i = minRowIdx; i <= maxRowIdx; i++) {
+        const cell = grid.rows[i].cells[startCell.cellIndex];
+        if (cell) {
+            cell.classList.add('highlight');
+        }
+    }
+    // Log the table header information for the selected column
+    const headerInfo = grid.rows[0].cells[startCell.cellIndex].textContent;
+    console.log(`Reservation made on table: ${headerInfo}`);
+}
+function clearHighlight() {
+    document.querySelectorAll('#dynamicGrid td').forEach(cell => {
+        cell.classList.remove('highlight');
     });
 }
 function addDayClickListener() {

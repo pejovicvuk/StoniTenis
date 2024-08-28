@@ -10,6 +10,7 @@ body {
     background-color: #f0f0f0; 
 }
 
+
 .containerCalendar {
     position: relative; 
     width: 100%; 
@@ -47,7 +48,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    margin-top: 25px;
+    margin-top: 20px;
 }
 
     .time-labels div {
@@ -71,21 +72,24 @@ body {
 
     #dynamicGrid th, #dynamicGrid td {
         border-right: 1px solid #ddd;
-        padding: 10px;
-        height: 40px;
+        height: 10px;
         text-align: center;
         background-color: #fff;
+        border: solid 1px black;
     }
 
     #dynamicGrid th {
         background-color:#373C4F;
         color: #F7F7F7;
         font-weight: 500;
+        height: 40px
     }
         #dynamicGrid th:last-child, #dynamicGrid td:last-child {
             border-right: none; 
         }
-
+        #dynamicGrid td.highlight{
+            background-color:orangered;
+        }
 
 .calendar {
     position: relative;
