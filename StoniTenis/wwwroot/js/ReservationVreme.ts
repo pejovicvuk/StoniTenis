@@ -63,35 +63,55 @@ function makeGrid(event?: Event): void {
             headerCell.textContent = `Sto ${i + 1}`;
             headerRow.appendChild(headerCell);
         }
+        const openingMinutesUkupno = openingHours * 60 + openingMinutes;
+        const closingMinutesUkupno = closingHours * 60 + closingMinutes;
+        const brojCelija = (closingMinutesUkupno - openingMinutesUkupno) / 15;
 
-        let currentMinutes = openingHours * 60 + openingMinutes;
-        const totalMinutes = closingHours * 60 + closingMinutes;
-        let firstLabelAdded = false;
-
-        while (currentMinutes <= totalMinutes) {
+        for (let i = 0; i < brojCelija; i++) {
             const row = table.insertRow();
+            //insertovanje timeLabela
+            const timeLabelDiv = document.createElement('div');
+            timeLabelDiv.textContent = `test`;
+            timeLabels.appendChild(timeLabelDiv);
             for (let j = 0; j < width; j++) {
-                row.insertCell();
-            }
-
-            const hours = Math.floor(currentMinutes / 60);
-            const minutes = currentMinutes % 60;
-            if (currentMinutes === openingHours * 60 + openingMinutes ||
-                currentMinutes === totalMinutes ||
-                minutes === 0) {
-                if (timeLabels) {
-                    const timeLabelDiv = document.createElement('div');
-                    timeLabelDiv.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-                    //if (timeLabelDiv.textContent.endsWith(':30')) {
-                    //    timeLabelDiv.style.marginTop = "20px";
-                    //    timeLabelDiv.style.position = "absolute";
-                    //}
-                    timeLabels.appendChild(timeLabelDiv);
-                    firstLabelAdded = true;
+                    row.insertCell();
                 }
-            }
-            currentMinutes += 15;
         }
+
+        
+
+
+
+
+
+        //let currentMinutes = openingHours * 60 + openingMinutes;
+        //const totalMinutes = closingHours * 60 + closingMinutes;
+        //let firstLabelAdded = false;
+
+        //while (currentMinutes <= totalMinutes) {
+        //    const row = table.insertRow();
+        //    for (let j = 0; j < width; j++) {
+        //        row.insertCell();
+        //    }
+
+        //    const hours = Math.floor(currentMinutes / 60);
+        //    const minutes = currentMinutes % 60;
+        //    if (currentMinutes === openingHours * 60 + openingMinutes ||
+        //        currentMinutes === totalMinutes ||
+        //        minutes === 0) {
+        //        if (timeLabels) {
+        //            const timeLabelDiv = document.createElement('div');
+        //            timeLabelDiv.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        //            //if (timeLabelDiv.textContent.endsWith(':30')) {
+        //            //    timeLabelDiv.style.marginTop = "20px";
+        //            //    timeLabelDiv.style.position = "absolute";
+        //            //}
+        //            timeLabels.appendChild(timeLabelDiv);
+        //            firstLabelAdded = true;
+        //        }
+        //    }
+        //    currentMinutes += 15;
+        //}
     });
 }
 
