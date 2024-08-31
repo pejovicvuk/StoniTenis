@@ -66,23 +66,26 @@ function makeGrid(event?: Event): void {
         const openingMinutesUkupno = openingHours * 60 + openingMinutes;
         const closingMinutesUkupno = closingHours * 60 + closingMinutes;
         const brojCelija = (closingMinutesUkupno - openingMinutesUkupno) / 15;
+        let currentMinutes = openingMinutesUkupno;
+        let firstLabelAdded = false;
 
-        for (let i = 0; i < brojCelija; i++) {
+        for (let i = 0; i <= brojCelija; i++) {
             const row = table.insertRow();
             //insertovanje timeLabela
-            const timeLabelDiv = document.createElement('div');
-            timeLabelDiv.textContent = `test`;
-            timeLabels.appendChild(timeLabelDiv);
+
+            let hours = Math.floor(currentMinutes / 60);
+            let minutes = currentMinutes % 60;
+            if (minutes % 60 === 0) {
+                const timeLabelDiv = document.createElement('div');
+                timeLabelDiv.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                timeLabels.appendChild(timeLabelDiv);
+                firstLabelAdded = true;
+            }
             for (let j = 0; j < width; j++) {
                     row.insertCell();
-                }
+            }
+            currentMinutes += 15;
         }
-
-        
-
-
-
-
 
         //let currentMinutes = openingHours * 60 + openingMinutes;
         //const totalMinutes = closingHours * 60 + closingMinutes;
