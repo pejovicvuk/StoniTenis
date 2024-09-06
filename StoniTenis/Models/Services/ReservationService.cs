@@ -102,7 +102,6 @@ namespace StoniTenis.Models.Services
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    // Input parameters
                     cmd.Parameters.AddWithValue("@Korisnici_id", korisnikID);
                     cmd.Parameters.AddWithValue("@Pocetak", pocetak);
                     cmd.Parameters.AddWithValue("@Kraj", kraj);
@@ -110,15 +109,12 @@ namespace StoniTenis.Models.Services
                     cmd.Parameters.AddWithValue("@StalnaRezervacija", stalnaRezervacija);
                     cmd.Parameters.AddWithValue("@Zavrseno", zavrseno);
 
-                    // Output parameter for the new ID
                     SqlParameter newIdParam = new SqlParameter("@NewID", SqlDbType.Int);
                     newIdParam.Direction = ParameterDirection.Output;
                     cmd.Parameters.Add(newIdParam);
 
-                    // Execute the command
                     await cmd.ExecuteNonQueryAsync();
 
-                    // Retrieve the newly generated ID
                     int newId = (int)newIdParam.Value;
                     return newId;
                 }
@@ -143,5 +139,21 @@ namespace StoniTenis.Models.Services
                 }
             }
         }
+        public async Task<int> BrojStolovaULokalu(int lokalID)
+        {
+            using (SqlConnection conn = _connectionService.GetConnection())
+            {
+                await conn.OpenAsync(); 
+                string sql = "SELECT COUNT(DISTINCT broj_stola) FROM stolovi WHERE lokal_id = @LokalID";
+
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@LokalID", lokalID);
+                    int brojStolova = (await cmd.ExecuteScalarAsync() as int?) ?? 0;
+                    return brojStolova;
+                }
+            }
+        }
+
     }
 }
